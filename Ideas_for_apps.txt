@@ -1,0 +1,55 @@
+1)
+With the cub3D/wolfeinstein/old_doom graphics, a game with several randomly generated labyrinths.
+			If too difficult, some top-down with field of view. => would allow for easier light fading management.
+			Alternatively, some fire emblem style game could also be used with the same modules as below.
+Labyrinths will contain both monsters and loots.
+A lobby where you can see other players and communicate with them through chat
+A solo version where there will be just several labyrinths in a chain with single connections between one and the next with increased difficulties each time until a final boss.
+A multiplayer option following the same pattern but with bigger and harder levels with cooperation as the goal.
+A multiplayer option with several initial labyrinths, each individual/team starting in a different one. The numbers of different labyrinths will diminish each level, resulting in PVP whenever encounters occur, with a timer for preventing camping in the early levels to annoy people.
+Customizable characters with a default available for when textures issues creep out.
+
+WEB
+0~2	frontend/backend frameworks (not sure, need research)
+2	real-time features
+2	Chat, profile, friends
+0~1	ORM for database
+0~1	custom-made design system should be possible
+
+ACCESSIBILITY AND INTERNATIONALIZATION
+0~1	Language should be easy
+
+USER MANAGEMENT
+2	User management and authentification
+1	Game stats
+2	Organization system (could be useful to facilitate matchmaking for tournament or something)
+
+ARTIFICIAL INTELLIGENCE
+0~1	auto chat moderation
+
+CYBERSECURITY
+X Nothing thought of yet
+
+GAMING AND USER EXPERIENCE
+2	complete web-based game with PVP option
+2	remote players
+2	multiplayer game
+0~1	Advanced chat features (should be feasible)
+1	Game customization options for solo and coop would be easy.
+1	level system on one labyrinth dive, achievements, badges, leaderboards, rewards in the form of character customization options for either achievements or leaderboards.
+
+DEVOPS
+X Nothing thought of yet
+
+DATA AND ANALYTICS
+X Nothing thought of yet
+
+BLOCKCHAIN
+X Nothing thought of yet
+
+
+
+
+
+TOTAL
+17~24		More than sufficient, can afford to give up on things.
