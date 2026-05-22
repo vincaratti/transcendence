@@ -1,3 +1,8 @@
+CHECK INFO FOR WEB ASSEMBLY
+
+UUID instead of ID, check documentation
+
+
 1)
 With the cub3D/wolfeinstein/old_doom graphics, a game with several randomly generated labyrinths.
 			If too difficult, some top-down with field of view. => would allow for easier light fading management.
