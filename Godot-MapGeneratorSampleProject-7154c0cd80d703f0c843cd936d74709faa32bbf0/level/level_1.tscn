@@ -1,0 +1,25 @@
+[gd_scene format=3 uid="uid://cgrvbb4wfthlo"]
+
+[ext_resource type="PackedScene" uid="uid://c4hha3hb0auhq" path="res://core/generator/map_generator_1.tscn" id="1_omkf0"]
+[ext_resource type="PackedScene" path="res://core/camera/FreeCamera.tscn" id="2_57wd1"]
+[ext_resource type="PackedScene" uid="uid://bwggrf7sbmkcv" path="res://addons/JehenoSimpleFirstPersonController/PlayerCharacter/player_character_scene.tscn" id="3_moo38"]
+
+[node name="Level1" type="Node3D" unique_id=442009818]
+
+[node name="MapGenerator1" parent="." unique_id=1707534169 instance=ExtResource("1_omkf0")]
+mapSeed = "42"
+useRandomSeed = false
+
+[node name="FreeCamera" parent="." unique_id=921289608 instance=ExtResource("2_57wd1")]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 30, 50, 30)
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=920867909]
+transform = Transform3D(1, 0, 0, 0, 0.800773, 0.598968, 0, -0.598968, 0.800773, 0, 0, 0)
+
+[node name="PlayerCharacter" type="Node3D" parent="." unique_id=2026890024]
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 30, 1.505, 30)
+
+[node name="PlayerCharacter" parent="PlayerCharacter" unique_id=307017552 instance=ExtResource("3_moo38")]
+walk_speed = 5.0
+run_speed = 10.0
+jump_height = 1.0
