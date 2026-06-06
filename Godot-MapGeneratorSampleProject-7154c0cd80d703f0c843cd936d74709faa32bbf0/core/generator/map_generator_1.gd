@@ -62,6 +62,8 @@ func set_gridmap_by_empty():
 		for y in range(height):
 			if map[x][y] == GEnum.TileType.Empty:
 				set_cell_item(Vector3i(x,0,y),0,0)
+			if map[x][y] == GEnum.TileType.Wall:
+				set_cell_item(Vector3i(x,0,y),1,0)
 	
 # 随机填充地图
 func random_fill_map():

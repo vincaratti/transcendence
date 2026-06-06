@@ -1,14 +1,12 @@
 [gd_scene format=3 uid="uid://cqpjcrcf1pf4o"]
 
 [ext_resource type="Script" uid="uid://bw2beqbw8tdfw" path="res://addons/DC3D/DungeonCrawler3D[Probably not]/World.gd" id="1_16uyv"]
+[ext_resource type="PackedScene" uid="uid://b0ekxxogjmxvh" path="res://addons/DC3D/DungeonCrawler3D[Probably not]/player/player.tscn" id="1_a7fmb"]
 [ext_resource type="PackedScene" uid="uid://b7yc03naufag0" path="res://addons/DC3D/DungeonCrawler3D[Probably not]/Map/map.tscn" id="2_prens"]
-[ext_resource type="PackedScene" uid="uid://bwggrf7sbmkcv" path="res://addons/JehenoSimpleFirstPersonController/PlayerCharacter/player_character_scene.tscn" id="3_soj5p"]
 
 [node name="World" type="Node3D" unique_id=62566534]
 script = ExtResource("1_16uyv")
 Map = ExtResource("2_prens")
 
-[node name="PlayerCharacter" parent="." unique_id=307017552 instance=ExtResource("3_soj5p")]
-transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 1.1529957, 2.694887, 1.5444624)
-walk_speed = 5.0
-jump_height = 1.0
+[node name="Player" parent="." unique_id=1744906786 instance=ExtResource("1_a7fmb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)

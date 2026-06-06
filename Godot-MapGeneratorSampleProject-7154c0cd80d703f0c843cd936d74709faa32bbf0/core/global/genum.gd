@@ -1,5 +1,5 @@
 extends Node
 
-enum TileType {Empty, Wall}
+enum TileType {Empty, Wall,NotSet}
 
 var Vector2_Dir : Array = [Vector2i(0,1), Vector2i(0,-1), Vector2i(-1,0), Vector2i(1,0)]

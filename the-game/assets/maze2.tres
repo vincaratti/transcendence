@@ -1,8 +1,8 @@
 [gd_resource type="MeshLibrary" format=4 uid="uid://ot3ojpgrvxbo"]
 
-[ext_resource type="Texture2D" uid="uid://ipfooqil3u2g" path="res://addons/timchi_maze_generation/assets/basic_maze_WOODA.png" id="1_k24tj"]
-[ext_resource type="Texture2D" uid="uid://ddduyoxnfnhse" path="res://addons/timchi_maze_generation/assets/basic_maze_REDBRICKS.png" id="2_y4r2i"]
-[ext_resource type="Texture2D" uid="uid://b7g12kiqnwp8" path="res://addons/timchi_maze_generation/assets/basic_maze_HEXAGONS.png" id="3_3fu6y"]
+[ext_resource type="Texture2D" uid="uid://dkyrer6fn02lx" path="res://addons/timchi_maze_generation/assets/basic_maze_WOODA.png" id="1_k24tj"]
+[ext_resource type="Texture2D" uid="uid://bbnhakj2572nb" path="res://addons/timchi_maze_generation/assets/basic_maze_REDBRICKS.png" id="2_y4r2i"]
+[ext_resource type="Texture2D" uid="uid://dfi1iigmk1kag" path="res://addons/timchi_maze_generation/assets/basic_maze_HEXAGONS.png" id="3_3fu6y"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1ef1v"]
 resource_name = "Floor"

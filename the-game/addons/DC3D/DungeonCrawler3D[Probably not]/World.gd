@@ -1,6 +1,6 @@
 extends Node3D
 
-const Cell = preload("res://Game/cell/cell.tscn")
+const Cell = preload("res://addons/DC3D/DungeonCrawler3D[Probably not]/cell/cell.tscn")
 
 @export var Map: PackedScene
 
@@ -15,6 +15,6 @@ func _ready() -> void:
 		var cell = Cell.instantiate()
 		add_child(cell)
 		cells.append(cell)
-		cell.global_transform.origin = Vector3(tile.x*Global.GRID_SIZE, 0, tile.y*Global.GRID_SIZE)
+		cell.global_transform.origin = Vector3(tile.x*1, 0, tile.y*1)
 	for cell in cells:
 		cell.update_faces(used_tiles)

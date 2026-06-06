@@ -24,12 +24,14 @@ var mapSizeX : int
 var mapSizeY : int
 # 地图集，Empty为空洞，Wall为实体墙
 var map : Array
+var fullmap : Array
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	generate_map()
 	draw_rooms()
 	connect_all_rooms_to_mainroom()
+	wall_up()
 
 func _input(event):
 	if event is InputEventMouseButton:
@@ -39,6 +41,7 @@ func _input(event):
 				generate_map()
 				draw_rooms()
 				connect_all_rooms_to_mainroom()
+				wall_up()
 
 # 清理地图
 func clear_map():
@@ -48,6 +51,11 @@ func clear_map():
 	
 # 生成随机地图
 func generate_map():
+	fullmap.clear()
+	for x in range(width*4):
+		fullmap.append([])
+		for y in range(height*4):
+			fullmap[x].append(GEnum.TileType.NotSet)
 	mapSizeX = floor(width/roomCentersSpace.x)
 	mapSizeY = floor(height/roomCentersSpace.y)
 	for x in range(mapSizeX):
@@ -105,7 +113,8 @@ func draw_rooms():
 		center = room.center * roomCentersSpace
 		for x in range(center.x-room.halfSize.x, center.x+room.halfSize.x+1):
 			for y in range(center.y-room.halfSize.y, center.y+room.halfSize.y+1):
-				set_cell_item(Vector3i(x,0,y),0,0)
+				#set_cell_item(Vector3i(x,0,y),0,0)
+				fullmap[x+maxRoomSize.x][y+maxRoomSize.y] = GEnum.TileType.Empty
 	
 # 把所有房间都连接到主房间
 func connect_all_rooms_to_mainroom():
@@ -156,7 +165,47 @@ func create_passage(roomA, roomB):
 	for dot in line:
 		if dir == 1:
 			for y in range(dot.y-halfWidth, dot.y+halfWidth+1):
-				set_cell_item(Vector3i(dot.x,0,y),0,0)
+				#set_cell_item(Vector3i(dot.x,0,y),0,0)
+				fullmap[dot.x+maxRoomSize.x][y+maxRoomSize.y] = GEnum.TileType.Empty
 		else:
 			for x in range(dot.x-halfWidth, dot.x+halfWidth+1):
-				set_cell_item(Vector3i(x,0,dot.y),0,0)
+				#set_cell_item(Vector3i(x,0,dot.y),0,0)
+				fullmap[x+maxRoomSize.x][dot.y+maxRoomSize.y] = GEnum.TileType.Empty
+
+func wall_up():
+	var directions = [
+		Vector2i(1,0),
+		Vector2i(-1,0),
+		Vector2i(0,1),
+		Vector2i(0,-1)
+	]
+	
+	for x in range(width*4):
+		for y in range(height*4):
+			if fullmap[x][y] == GEnum.TileType.Empty:
+				set_cell_item(Vector3i(x,0,y),0,0)
+			if fullmap[x][y] == GEnum.TileType.NotSet:
+				for d in directions:
+					var nx = x+d.x
+					var ny = y+d.y
+					if nx<0 or ny<0 or nx>=width*4 or ny>=height*4:
+						continue
+					if fullmap[nx][ny] == GEnum.TileType.Empty:
+						fullmap[x][y] = GEnum.TileType.Wall
+						set_cell_item(Vector3i(x,0,y),1,0)
+						break
+						
+	for x in range(width*4):
+		for y in range(height*4):
+			if fullmap[x][y] == GEnum.TileType.NotSet:
+				var nbwall = 0
+				for d in directions:
+					var nx = x+d.x
+					var ny = y+d.y
+					if nx<0 or ny<0 or nx>=width*4 or ny>=height*4:
+						continue
+					if fullmap[nx][ny] == GEnum.TileType.Wall:
+						nbwall = nbwall + 1
+						if nbwall >= 2:
+							set_cell_item(Vector3i(x,0,y),1,0)
+							break
