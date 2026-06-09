@@ -1,0 +1,35 @@
+services:
+
+  nginx:
+    build: ./nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      # Serve the frontend files — swap this for a build artifact later
+      - ./frontend:/usr/share/nginx/html:ro
+    restart: unless-stopped
+
+  # ── Add services below as you build them ──────────────────────────────
+  #
+  # api:
+  #   build: ./api
+  #   env_file: .env
+  #   depends_on:
+  #     - postgres
+  #   restart: unless-stopped
+  #
+  # postgres:
+  #   image: postgres:16-alpine
+  #   env_file: .env
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   restart: unless-stopped
+  #
+  # game:
+  #   build: ./game
+  #   env_file: .env
+  #   restart: unless-stopped
+
+# volumes:
+#   postgres_data:
