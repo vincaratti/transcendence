@@ -8,7 +8,8 @@ COPY package*.json ./
 
 # install dependencies
 RUN npm install
-
+# install testing dependencies for vitest and vue test utils and jsdom for testing in a node environment
+RUN npm install -D vitest @vue/test-utils jsdom
 # copy the rest of the frontend
 COPY . .
 

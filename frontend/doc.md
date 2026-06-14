@@ -31,7 +31,6 @@ tool to make developement easier
 mounts describe how components are intialised, onMount is like constructor in object oriented programming
 
 
-
     interpolation {{}}
 works only in template
 uses JS scope from <script>
@@ -39,6 +38,8 @@ uses JS scope from <script>
     Events can be created through @ syntax
 useful events :
     @click
+    if you need to await or fetch inside a function you NEED to declare it as async
+    during tests you might need to use await nextTick() for the sake of DOM s next update
     Imports
 imports seem to function very much like python as far as i can tell so far
  they must be inside scripts
