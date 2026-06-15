@@ -47,9 +47,12 @@ const Screen = Object.freeze({
 
 const screen = ref(Screen.LOGIN)
 const currentUser = ref(null)
+const authToken = ref(null)
 
-function handleLoggedIn(user) {
+
+function handleLoggedIn(user, accessToken) {
   currentUser.value = user
+  authToken.value = accessToken
   screen.value = Screen.LOBBY
 }
 </script>
