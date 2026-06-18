@@ -1,6 +1,7 @@
 // here we initialise the app 
 import {createApp} from 'vue'
 import Transcendence from './Transcendence.vue'
+import './style.css'
 
 createApp(Transcendence).mount('#test') // id of the div in index.html
 
