@@ -1,0 +1,15 @@
+{
+	"name": "transcendence-auth-service",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "node --watch src/index.js",
+		"start": "node src/index.js"
+	},
+	"dependencies": {
+		"express": "^5.1.0",
+		"jsonwebtoken": "^9.0.0",
+		"bcrypt": "^5.1.0",
+		"pg": "^8.13.0"
+	}
+}

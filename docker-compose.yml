@@ -5,31 +5,60 @@ services:
     ports:
       - "80:80"
       - "443:443"
-    volumes:
-      # Serve the frontend files — swap this for a build artifact later
-      - ./frontend:/usr/share/nginx/html:ro
+    depends_on:
+      - frontend
+      - backend
+      - auth-service
+    networks:
+      - frontend-network
+      - backend-network
     restart: unless-stopped
 
-  # ── Add services below as you build them ──────────────────────────────
-  #
-  # api:
-  #   build: ./api
-  #   env_file: .env
-  #   depends_on:
-  #     - postgres
-  #   restart: unless-stopped
-  #
-  # postgres:
-  #   image: postgres:16-alpine
-  #   env_file: .env
-  #   volumes:
-  #     - postgres_data:/var/lib/postgresql/data
-  #   restart: unless-stopped
-  #
-  # game:
-  #   build: ./game
-  #   env_file: .env
-  #   restart: unless-stopped
+  frontend:
+    build: ./frontend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - frontend-network
+    restart: unless-stopped
 
-# volumes:
-#   postgres_data:
+  backend:
+    build: ./backend
+    env_file: .env
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    depends_on:
+      - postgresql
+    networks:
+      - backend-network
+    restart: unless-stopped
+
+  auth-service:
+    build: ./auth-service
+    env_file: .env
+    volumes:
+      - ./auth-service:/app
+      - /app/node_modules
+    depends_on:
+      - postgresql
+    networks:
+      - backend-network
+    restart: unless-stopped
+
+  postgresql:
+    image: postgres:16-alpine
+    env_file: .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  frontend-network:
+  backend-network:
