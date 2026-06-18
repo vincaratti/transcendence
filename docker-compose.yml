@@ -26,6 +26,9 @@ services:
   backend:
     build: ./backend
     env_file: .env
+    environment:
+      - DB_HOST=postgresql
+      - DB_PORT=5432
     volumes:
       - ./backend:/app
       - /app/node_modules
@@ -50,6 +53,8 @@ services:
   postgresql:
     image: postgres:16-alpine
     env_file: .env
+    ports:
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:

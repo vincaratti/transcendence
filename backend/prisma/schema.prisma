@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  password  String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("users")
+}
+
+model Game {
+  id             String     @id @default(uuid())
+  code           String     @unique
+  status         GameStatus @default(WAITING)
+  currentTeam    Team       @default(RED) @map("current_team")
+  phase          Phase      @default(CLUE)
+  remainingGuess Int        @default(0) @map("remaining_guess")
+  currentClue    String?    @map("current_clue")
+  winner         Team?
+  board          Json
+  createdAt      DateTime   @default(now()) @map("created_at")
+  updatedAt      DateTime   @updatedAt @map("updated_at")
+  players        Player[]
+
+  @@map("games")
+}
+
+model Player {
+  id     String     @id @default(uuid())
+  team   Team
+  role   PlayerRole
+  userId String     @map("user_id")
+  game   Game       @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  gameId String     @map("game_id")
+
+  @@unique([userId, gameId])
+  @@map("players")
+}
+
+enum GameStatus {
+  WAITING
+  IN_PROGRESS
+  FINISHED
+}
+
+enum Team {
+  RED
+  BLUE
+}
+
+enum Phase {
+  CLUE
+  GUESS
+}
+
+enum PlayerRole {
+  SPYMASTER
+  OPERATIVE
+}
