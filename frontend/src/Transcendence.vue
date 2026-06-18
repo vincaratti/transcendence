@@ -8,8 +8,8 @@
     @logged-in="handleLoggedIn"
   />
 
-  <template v-else-if="screen === Screen.LOBBY">
-    <preGameChat />
+  <template v-else-if="screen === Screen.LOBBY"> // do we want people to be able to get to lobby without connecting ?
+    <preGameChat :user="currentUser":token="authToken"/>
 
     <button @click="screen = Screen.SINGLEPLAYER">
       Singleplayer
@@ -37,7 +37,7 @@ import Logins from './components/Logins.vue'
 import Singleplayer from './components/Singleplayer.vue'
 import Multiplayer from './components/Multiplayer.vue'
 import preGameChat from './components/PreGameChat.vue'
-
+import { setAuthToken } from './components/utils.js'
 const Screen = Object.freeze({
   LOGIN: 'login',
   LOBBY: 'lobby',
@@ -53,6 +53,7 @@ const authToken = ref(null)
 function handleLoggedIn(user, accessToken) {
   currentUser.value = user
   authToken.value = accessToken
+  setAuthToken(accessToken)
   screen.value = Screen.LOBBY
 }
 </script>

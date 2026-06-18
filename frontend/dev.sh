@@ -1,13 +1,9 @@
 #!/bin/bash
 
 IMAGE="frontend"
-
-if ! sudo docker image inspect "$IMAGE" >/dev/null 2>&1; then
-    echo "Building image..."
-    sudo docker build -f Dockerfile.dev -t "$IMAGE" . || exit 1
-else
-    echo "Using existing image '$IMAGE'"
-fi
+sudo docker rm -f frontend-dev
+sudo docker image rm frontend
+sudo docker build -f Dockerfile.dev -t "$IMAGE" . || exit 1
 
 sudo docker rm -f frontend-dev >/dev/null 2>&1 || true
 

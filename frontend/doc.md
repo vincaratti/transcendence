@@ -1,16 +1,11 @@
 
 # impersonal doc
 https://www.youtube.com/watch?v=VeNfHj6MhgA // 3hours of vue from scratch
-
-
+https://test-utils.vuejs.org/guide // test doc, quite direct and practical
 
 # practical doc
 
 >package.json
-# is in the root of the frontend directory
-# it can be used by docker to install dependencies
-# todo make docker install those dependencies
-# in this endeavor those scripts are necessary (npm run dev, npm run build, etc.)
 
 # COPY package*.json ./
 # RUN npm install
