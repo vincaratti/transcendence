@@ -59,3 +59,9 @@ X Nothing thought of yet
 
 TOTAL
 17~24		More than sufficient, can afford to give up on things.
+
+
+
+
+
+SOLO MAIS : Possibilité d'envoyer des malus vers les autres joueurs. (Faux multi)
