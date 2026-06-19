@@ -5,13 +5,13 @@ export class User {
   @PrimaryKey({ autoincrement: true })
   id!: number;
 
-  @Property()
+  @Property({ nullable: false })
   username!: string;
 
-  @Property()
+  @Property({ nullable: false })
   email!: string;
 
-  @Property()
+  @Property({ nullable: false })
   passwordHash!: string;
 
   @Property()
