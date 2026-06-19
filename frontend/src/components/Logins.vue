@@ -1,14 +1,14 @@
 <template>
   <div class="login-container">
-    <h1>TRANSCENDENCE</h1>
-    <button @click="login"v-if="!LoggedIn">
+    <button data-testid="login-button" @click="login" v-if="!LoggedIn">
       Login
     </button>
 
-    <button @click="signup"v-if="!LoggedIn">
-    Sign up
+    <button data-testid="signup-button" @click="signup" v-if="!LoggedIn">
+      Sign up
     </button>
     <p v-if="LoggedIn">Welcome, {{ username }}!</p>
+    <p v-if="error" class="error"> {{ error }}    </p>
   </div>
 </template>
 
@@ -16,20 +16,22 @@
 import { ref } from 'vue'
 import { API_URL } from '@/config.js'
 
-// state (replaces data())
 const LoggedIn = ref(false)
 const username = ref('')
+const error = ref(null)
 
-// emits (replaces this.$emit)
 const emit = defineEmits(['logged-in'])
 
 async function login() {
-  console.log('Login clicked')
-
-  const user = prompt("Enter your username:")
+  const mail = prompt("Enter your email:")
   const pass = prompt("Enter your password:")
 
-  if (!user || !pass) return
+  if (!mail || !pass)
+  {
+      error.value = "All fields are required"
+      return
+  }
+  
 
   try {
     const response = await fetch(`${API_URL}/login`, {
@@ -38,35 +40,83 @@ async function login() {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        username: user,
+        email: mail,
         password: pass
       })
     })
 
+    const data = await response.json()
+
     if (response.ok) {
       LoggedIn.value = true
-      username.value = user
-      emit('logged-in', user)
-    } else {
-      alert('Invalid credentials')
-    }
+      username.value = data.user.username
 
+      emit('logged-in', data.user, data.accessToken)
+
+      error.value = null
+    } else {
+      error.value = data.error?.message || 'Invalid credentials'
+      alert(error.value)
+    }
   } catch (err) {
-    console.error('Login error:', err)
+    error.value = err.message
     alert('Server error')
   }
 }
 
-function signup() {
-  console.log('Sign up clicked')
+async function signup() {
+  const user = prompt("Enter your username:")
+  const mail = prompt("Enter your email:")
+  const pass = prompt("Enter your password:")
+
+  if (!user || !mail || !pass) {
+    error.value = "All fields are required"
+    return
+  }
+
+  if (user.length > 20) {
+    error.value = "Please choose a name under 21 characters"
+    return
+  }
+
+  if (pass.length > 20) {
+    error.value = "Please choose a password under 21 characters"
+    return
+  }
+
+  const response = await fetch(`${API_URL}/register`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      username: user,
+      email: mail,
+      password: pass
+    })
+  })
+
+  const data = await response.json()
+
+  if (response.status === 201) {
+    LoggedIn.value = true
+    username.value = user
+    emit('logged-in', user, data.accessToken)
+  } else {
+    error.value = data.error?.message || 'Signup failed'
+    alert(error.value)
+  }
 }
 </script>
 <style scoped>
 .login-container {
   text-align: center;
 }
+.error {
+  color: rgb(240, 58, 58);
+}
 
 button {
-  margin: 10px;
+  margin: 15px;
 }
 </style>

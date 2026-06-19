@@ -1,16 +1,11 @@
 
 # impersonal doc
 https://www.youtube.com/watch?v=VeNfHj6MhgA // 3hours of vue from scratch
-
-
+https://test-utils.vuejs.org/guide // test doc, quite direct and practical
 
 # practical doc
 
 >package.json
-# is in the root of the frontend directory
-# it can be used by docker to install dependencies
-# todo make docker install those dependencies
-# in this endeavor those scripts are necessary (npm run dev, npm run build, etc.)
 
 # COPY package*.json ./
 # RUN npm install
@@ -31,7 +26,6 @@ tool to make developement easier
 mounts describe how components are intialised, onMount is like constructor in object oriented programming
 
 
-
     interpolation {{}}
 works only in template
 uses JS scope from <script>
@@ -39,6 +33,8 @@ uses JS scope from <script>
     Events can be created through @ syntax
 useful events :
     @click
+    if you need to await or fetch inside a function you NEED to declare it as async
+    during tests you might need to use await nextTick() for the sake of DOM s next update
     Imports
 imports seem to function very much like python as far as i can tell so far
  they must be inside scripts
