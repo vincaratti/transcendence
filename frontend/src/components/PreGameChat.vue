@@ -1,6 +1,7 @@
 // this one is tricky and i should focus
 //  on the chat before the game and settings because idk how to communciate with godot
 // altho for chat i need to comunicate with server
+
 /*
 GET    /api/friends                    -> 200 { friends: [{ id, username, avatarUrl, status, online }] }
 POST   /api/friends/requests           body: { toUserId }       -> 201 { request }
@@ -9,6 +10,18 @@ DELETE /api/friends/:userId            -> 204
 POST   /api/blocks                     body: { userId }         -> 201
 DELETE /api/blocks/:userId             -> 204
 */
+
+-- messages (DM if recipient_id set, else lobby/global channel)
+messages(
+  id            uuid PRIMARY KEY,
+  sender_id     uuid NOT NULL REFERENCES users(id),
+  recipient_id  uuid REFERENCES users(id),  -- null = global lobby
+  content       text NOT NULL,
+  read_at       timestamptz,                -- for read receipts (advanced chat)
+  created_at    timestamptz NOT NULL DEFAULT now()
+)
+
+
 
 <template>
   <div class="chatcontainer">

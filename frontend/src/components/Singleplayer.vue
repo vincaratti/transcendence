@@ -1,5 +1,6 @@
 // this should have the wasm
 // not sure how to do it maybe use javascript bridge to call godot wrapper or something
+
 <template>
     <div class="singleGame">  
 
