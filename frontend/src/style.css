@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
-body {
-  background: #0a0a0a;
-  color: #e0e0e0;
-  font-family: monospace;
+@layer base {
+  body {
+    @apply bg-zinc-950 text-zinc-100 min-h-screen antialiased;
+  }
 }
