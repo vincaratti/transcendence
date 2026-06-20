@@ -1,6 +1,7 @@
 <template>
 	<div class="flex flex-col items-center gap-6 p-6 max-w-3xl mx-auto mt-24">
 		<h1 class="text-3xl tracking-widest font-bold text-white uppercase">Transcendence</h1>
+		<p v-if="user?.username" class="text-zinc-400 text-sm">Welcome, <span class="text-white font-medium">{{ user.username }}</span></p>
 		<p class="text-zinc-500 text-sm">Create a new game or join an existing one.</p>
 
 		<div class="flex gap-3">
@@ -22,9 +23,10 @@
 
 <script setup>
 import { useRouter } from 'vue-router'
-import { apiFetch, clearAuth } from './utils.js'
+import { apiFetch, clearAuth, getStoredUser } from './utils.js'
 
 const router = useRouter()
+const user = getStoredUser()
 
 async function startGame() {
 	const response = await apiFetch('/game/create', { method: 'POST' })
