@@ -13,6 +13,7 @@ model User {
   email     String   @unique
   password  String
   createdAt DateTime @default(now()) @map("created_at")
+  players   Player[]
 
   @@map("users")
 }
@@ -38,6 +39,7 @@ model Player {
   id     String     @id @default(uuid())
   team   Team
   role   PlayerRole
+  user   User       @relation(fields: [userId], references: [id])
   userId String     @map("user_id")
   game   Game       @relation(fields: [gameId], references: [id], onDelete: Cascade)
   gameId String     @map("game_id")

@@ -3,7 +3,7 @@
 		<span class="text-zinc-400">Loading ...</span>
 	</div>
 
-	<Lobby v-else-if="game.status === 'WAITING'" :game="game" @start="startGame" />
+	<Lobby v-else-if="game.status === 'WAITING'" :game="game" @start="startGame" @join="joinTeam" />
 
 	<div v-else class="flex flex-col items-center gap-6 p-6 max-w-3xl mx-auto">
 		<div class="flex items-center justify-between w-full">
@@ -116,6 +116,17 @@ onMounted(async () => {
 	const res = await apiFetch(`/game/${route.params.code}`);
 	game.value = await res.json();
 })
+
+
+async function joinTeam({ team, role }) {
+	await apiFetch(`/game/${route.params.code}/join`, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ team, role }),
+	});
+	const res = await apiFetch(`/game/${route.params.code}`);
+	game.value = await res.json();
+}
 
 async function startGame() {
 	const res = await apiFetch(`/game/${route.params.code}/start`, { method: 'POST' });

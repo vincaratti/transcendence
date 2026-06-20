@@ -47,7 +47,7 @@ function initGame(startingTeam = CARD_TYPES.RED) {
 	return gameState;
 }
 
-async function createGame() {
+async function createGame(userId) {
 	const state = initGame();
 
 	const game = await prisma.game.create({
@@ -58,7 +58,15 @@ async function createGame() {
 			phase: state.phase,
 			remainingGuess: state.remainingGuess,
 			board: state.board,
-		}
+			players: {
+				create: {
+					userId,
+					team: state.currentTeam,
+					role: "SPYMASTER",
+				},
+			},
+		},
+		include: { players: true },
 	})
 	return game
 }
@@ -71,7 +79,22 @@ async function startGame(game) {
 }
 
 async function getGame(code) {
-	return prisma.game.findUnique({ where: { code }, include: { players: true } });
+	return prisma.game.findUnique({
+		where: { code },
+		include: { players: { include: { user: { select: { username: true } } } } },
+	});
+}
+
+async function joinGame(code, userId, team, role) {
+	return prisma.player.create({
+		data: {
+			team,
+			role,
+			game: { connect: { code } },
+			user: { connect: { id: userId } },
+		},
+		include: { user: { select: { username: true } } },
+	});
 }
 
 function revealCard(game, index) {
@@ -126,4 +149,12 @@ function switchTurn(game) {
 	return game;
 }
 
-export { CARD_TYPES, GAME_STATUS, PHASE_TYPES, createGame, getGame, revealCard, setClue, startGame };
+async function leaveGame(code, userId) {
+	const game = await prisma.game.findUnique({ where: { code } });
+	if (!game) return null;
+	return prisma.player.delete({
+		where: { userId_gameId: { userId, gameId: game.id } },
+	});
+}
+
+export { CARD_TYPES, GAME_STATUS, PHASE_TYPES, createGame, getGame, joinGame, leaveGame, revealCard, setClue, startGame };

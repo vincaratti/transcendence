@@ -1,5 +1,6 @@
 {
     "dependencies": {
+        "socket.io-client": "^4.8.3",
         "vue": "^3.2.0",
         "vue-router": "^4.6.4"
     },
@@ -16,5 +17,4 @@
         "test": "vitest",
         "test:run": "vitest run"
     }
-    
 }
