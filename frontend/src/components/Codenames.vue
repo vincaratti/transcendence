@@ -3,17 +3,7 @@
 		<span class="text-zinc-400">Loading ...</span>
 	</div>
 
-	<div v-else-if="game.status === 'WAITING'" class="flex flex-col items-center gap-6 p-6 max-w-3xl mx-auto">
-		<h1 class="text-3xl tracking-widest font-bold text-white">LOBBY</h1>
-		<p class="text-zinc-400">Game code: <span class="font-mono text-white">{{ game.code }}</span></p>
-		<div class="text-zinc-500 text-sm">Waiting for players...</div>
-		<button
-			@click="startGame"
-			class="px-5 py-2 rounded text-sm font-semibold bg-zinc-200 text-zinc-900 hover:bg-white transition-colors"
-		>
-			Start Game
-		</button>
-	</div>
+	<Lobby v-else-if="game.status === 'WAITING'" :game="game" @start="startGame" />
 
 	<div v-else class="flex flex-col items-center gap-6 p-6 max-w-3xl mx-auto">
 		<div class="flex items-center justify-between w-full">
@@ -113,6 +103,8 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { apiFetch } from './utils.js'
+import Lobby from './Lobby.vue'
 
 const route = useRoute();
 const game = ref(null);
@@ -121,12 +113,12 @@ const clueWord = ref('');
 const clueNumber = ref(null);
 
 onMounted(async () => {
-	const res = await fetch(`/api/game/${route.params.code}`);
+	const res = await apiFetch(`/game/${route.params.code}`);
 	game.value = await res.json();
 })
 
 async function startGame() {
-	const res = await fetch(`/api/game/${route.params.code}/start`, { method: 'POST' });
+	const res = await apiFetch(`/game/${route.params.code}/start`, { method: 'POST' });
 	game.value = await res.json();
 }
 

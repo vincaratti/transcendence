@@ -1,15 +1,6 @@
 import { createApp } from 'vue'
-import Transcendence from './Transcendence.vue'
+import { RouterView } from 'vue-router'
 import router from './router.js'
 import './style.css'
 
-createApp(Transcendence).use(router).mount('#app')
-
-
-
-
-
-
-
-
-
+createApp(RouterView).use(router).mount('#app')
