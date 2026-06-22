@@ -88,7 +88,6 @@ const currentUser = getStoredUser();
 const socket = getSocket();
 
 onMounted(() => {
-	socket.emit('join-lobby', props.game.code);
 	socket.on('player-joined', (player) => {
 		if (!props.game.players.find(p => p.id === player.id)) {
 			props.game.players.push(player);
@@ -105,7 +104,6 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-	socket.emit('leave-lobby', props.game.code);
 	socket.off('player-joined');
 	socket.off('player-left');
 	socket.off('player-switched');

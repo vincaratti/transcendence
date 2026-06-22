@@ -1,6 +1,6 @@
 import { Server } from 'socket.io'
 import jwt from 'jsonwebtoken'
-import { leaveGame } from './services/game.js'
+import { getGame, leaveGame, revealCard, saveGameState, setClue, switchTurn, GAME_STATUS } from './services/game.js'
 
 let io;
 
@@ -26,8 +26,11 @@ export function initSocket(server) {
 
 		socket.on('leave-lobby', async (gameCode) => {
 			try {
-				await leaveGame(gameCode, socket.user.userId);
-				socket.to(`lobby:${gameCode}`).emit('player-left', socket.user.userId);
+				const game = await getGame(gameCode);
+				if (game && game.status === GAME_STATUS.WAITING) {
+					await leaveGame(gameCode, socket.user.userId);
+					socket.to(`lobby:${gameCode}`).emit('player-left', socket.user.userId);
+				}
 			} catch (e) {
 				console.error('leave-lobby error:', e);
 			}
@@ -35,12 +38,59 @@ export function initSocket(server) {
 			socket.leave(`lobby:${gameCode}`);
 		});
 
+		socket.on('submit-clue', async ({ gameCode, clue, number }) => {
+			try {
+				const game = await getGame(gameCode);
+				if (!game) return;
+				const player = game.players.find(p => p.userId === socket.user.userId);
+				if (!player || player.role !== 'SPYMASTER' || player.team !== game.currentTeam) return;
+				const updated = setClue(game, clue, number);
+				if (!updated) return;
+				const saved = await saveGameState(updated);
+				io.to(`lobby:${gameCode}`).emit('game-updated', saved);
+			} catch (e) {
+				console.error('submit-clue error:', e);
+			}
+		});
+
+		socket.on('guess', async ({ gameCode, index }) => {
+			try {
+				const game = await getGame(gameCode);
+				if (!game) return;
+				const player = game.players.find(p => p.userId === socket.user.userId);
+				if (!player || player.role !== 'OPERATIVE' || player.team !== game.currentTeam) return;
+				const updated = revealCard(game, index);
+				if (!updated) return;
+				const saved = await saveGameState(updated);
+				io.to(`lobby:${gameCode}`).emit('game-updated', saved);
+			} catch (e) {
+				console.error('guess error:', e);
+			}
+		});
+
+		socket.on('end-turn', async ({ gameCode }) => {
+			try {
+				const game = await getGame(gameCode);
+				if (!game || game.status !== GAME_STATUS.IN_PROGRESS || game.phase !== 'GUESS') return;
+				const player = game.players.find(p => p.userId === socket.user.userId);
+				if (!player || player.role !== 'OPERATIVE' || player.team !== game.currentTeam) return;
+				const updated = switchTurn(game);
+				const saved = await saveGameState(updated);
+				io.to(`lobby:${gameCode}`).emit('game-updated', saved);
+			} catch (e) {
+				console.error('end-turn error:', e);
+			}
+		});
+
 		socket.on('disconnect', async () => {
 			const gameCode = socket.data.gameCode;
 			if (!gameCode) return;
 			try {
-				await leaveGame(gameCode, socket.user.userId);
-				socket.to(`lobby:${gameCode}`).emit('player-left', socket.user.userId);
+				const game = await getGame(gameCode);
+				if (game && game.status === GAME_STATUS.WAITING) {
+					await leaveGame(gameCode, socket.user.userId);
+					socket.to(`lobby:${gameCode}`).emit('player-left', socket.user.userId);
+				}
 			} catch (e) {
 				console.error('disconnect leave error:', e);
 			}

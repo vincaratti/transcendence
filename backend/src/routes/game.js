@@ -57,9 +57,11 @@ router.get('/:code', async (req, res) => {
 router.post('/:code/start', async (req, res) => {
 	const game = await getGame(req.params.code);
 	if (!game) return res.status(404).json({ error: 'Game not found' });
-	//TODO: Check number of players
-	await startGame(game);
-	res.json(game);
+	if (game.status !== GAME_STATUS.WAITING) return res.status(400).json({ error: 'Game already started' });
+	if (game.players.length < 4) return res.status(400).json({ error: 'Not enough players' });
+	const updated = await startGame(game);
+	getIO().to(`lobby:${req.params.code}`).emit('game-started', updated);
+	res.json(updated);
 });
 
 export default router;

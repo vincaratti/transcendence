@@ -72,9 +72,26 @@ async function createGame(userId) {
 }
 
 async function startGame(game) {
-	await prisma.game.update({
+	return prisma.game.update({
 		where: { id: game.id },
 		data: { status: GAME_STATUS.IN_PROGRESS },
+		include: { players: { include: { user: { select: { username: true } } } } },
+	});
+}
+
+async function saveGameState(game) {
+	return prisma.game.update({
+		where: { id: game.id },
+		data: {
+			status: game.status,
+			currentTeam: game.currentTeam,
+			phase: game.phase,
+			remainingGuess: game.remainingGuess,
+			currentClue: game.currentClue,
+			winner: game.winner,
+			board: game.board,
+		},
+		include: { players: { include: { user: { select: { username: true } } } } },
 	});
 }
 
@@ -134,10 +151,11 @@ function revealCard(game, index) {
 	return game;
 }
 
-function setClue(game, number) {
+function setClue(game, clue, number) {
 	if (number < 1 || game.status != GAME_STATUS.IN_PROGRESS || game.remainingGuess >= 1)
 		return ;
 	game.remainingGuess = number + 1;
+	game.currentClue = clue;
 	game.phase = PHASE_TYPES.GUESS;
 	return game;
 }
@@ -167,4 +185,4 @@ async function leaveGame(code, userId) {
 	});
 }
 
-export { CARD_TYPES, GAME_STATUS, PHASE_TYPES, createGame, getGame, joinGame, leaveGame, revealCard, setClue, startGame, switchRole };
+export { CARD_TYPES, GAME_STATUS, PHASE_TYPES, createGame, getGame, joinGame, leaveGame, revealCard, saveGameState, setClue, startGame, switchRole, switchTurn };
