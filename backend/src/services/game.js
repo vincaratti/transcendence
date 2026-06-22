@@ -149,6 +149,16 @@ function switchTurn(game) {
 	return game;
 }
 
+async function switchRole(code, userId, team, role) {
+	const game = await prisma.game.findUnique({ where: { code } });
+	if (!game) return null;
+	return prisma.player.update({
+		where: { userId_gameId: { userId, gameId: game.id } },
+		data: { team, role },
+		include: { user: { select: { username: true } } },
+	});
+}
+
 async function leaveGame(code, userId) {
 	const game = await prisma.game.findUnique({ where: { code } });
 	if (!game) return null;
@@ -157,4 +167,4 @@ async function leaveGame(code, userId) {
 	});
 }
 
-export { CARD_TYPES, GAME_STATUS, PHASE_TYPES, createGame, getGame, joinGame, leaveGame, revealCard, setClue, startGame };
+export { CARD_TYPES, GAME_STATUS, PHASE_TYPES, createGame, getGame, joinGame, leaveGame, revealCard, setClue, startGame, switchRole };

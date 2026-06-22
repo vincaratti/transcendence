@@ -46,7 +46,13 @@
 						>
 							+ Join
 						</button>
-						<div v-else class="text-zinc-600 italic">Empty</div>
+						<button
+							v-else
+							@click="$emit('switch', { team, role })"
+							class="text-zinc-500 hover:text-white transition-colors cursor-pointer"
+						>
+							Switch here
+						</button>
 					</div>
 				</div>
 			</div>
@@ -76,7 +82,7 @@ const props = defineProps({
 	game: { type: Object, required: true },
 });
 
-const emit = defineEmits(['start', 'join']);
+const emit = defineEmits(['start', 'join', 'switch']);
 
 const currentUser = getStoredUser();
 const socket = getSocket();
@@ -92,12 +98,17 @@ onMounted(() => {
 		const idx = props.game.players.findIndex(p => p.userId === userId);
 		if (idx !== -1) props.game.players.splice(idx, 1);
 	});
+	socket.on('player-switched', (player) => {
+		const idx = props.game.players.findIndex(p => p.id === player.id);
+		if (idx !== -1) Object.assign(props.game.players[idx], player);
+	});
 })
 
 onUnmounted(() => {
 	socket.emit('leave-lobby', props.game.code);
 	socket.off('player-joined');
 	socket.off('player-left');
+	socket.off('player-switched');
 })
 
 const myPlayer = computed(() =>

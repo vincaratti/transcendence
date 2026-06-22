@@ -3,7 +3,7 @@
 		<span class="text-zinc-400">Loading ...</span>
 	</div>
 
-	<Lobby v-else-if="game.status === 'WAITING'" :game="game" @start="startGame" @join="joinTeam" />
+	<Lobby v-else-if="game.status === 'WAITING'" :game="game" @start="startGame" @join="joinTeam" @switch="switchTeam" />
 
 	<div v-else class="flex flex-col items-center gap-6 p-6 max-w-3xl mx-auto">
 		<div class="flex items-center justify-between w-full">
@@ -126,6 +126,14 @@ async function joinTeam({ team, role }) {
 	});
 	const res = await apiFetch(`/game/${route.params.code}`);
 	game.value = await res.json();
+}
+
+async function switchTeam({ team, role }) {
+	await apiFetch(`/game/${route.params.code}/switch`, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ team, role }),
+	});
 }
 
 async function startGame() {
