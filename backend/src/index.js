@@ -5,6 +5,7 @@ import { initSocket } from './socket.js'
 import gameRoutes from "./routes/game.js"
 import userRoutes from "./routes/user.js"
 import friendRoutes from "./routes/friends.js"
+import statsRoutes from "./routes/stats.js"
 
 const app = express();
 const server = createServer(app);
@@ -17,6 +18,7 @@ app.use(express.json());
 app.use("/game", authenticate, gameRoutes)
 app.use("/users", authenticate, userRoutes)
 app.use("/friends", authenticate, friendRoutes)
+app.use("/stats", authenticate, statsRoutes)
 
 server.listen(PORT, '0.0.0.0', () => {
 	console.log(`backend listening on port ${PORT}`)
