@@ -4,6 +4,8 @@ import prisma from '../services/prisma.js';
 
 const router = Router();
 
+//[STATS]
+
 router.get('/me', async (req, res) => {
   try 
   {
@@ -30,6 +32,7 @@ router.get('/:userId', async (req, res) => {
   }
 });
 
+//[MATCHES]
 
 router.get('/me/matches', async (req, res) => {
   try 
@@ -57,6 +60,36 @@ router.get('/:userId/matches', async (req, res) => {
   }
 });
 
+//[LEADERBOARD]
+
+router.get('/leaderboard', async (req, res) => {
+  try 
+  {
+    const { limit = 10, cursor } = req.query;
+    const leaderboard = await getLeaderboard(parseInt(limit), cursor);
+    res.json(leaderboard);
+  } 
+  catch (error) 
+  {
+    console.error('Error fetching leaderboard:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+router.get('/leaderboard/me', async (req, res) => {
+  try 
+  {
+    const rank = await getMyRank(req.user.userId);
+    res.json(rank);
+  } 
+  catch (error) 
+  {
+    console.error('Error fetching my rank:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+//[STATS]
 
 async function getUserStats(userId) {
   const players = await prisma.player.findMany({
@@ -96,6 +129,8 @@ async function getUserStats(userId) {
     blueWins,
   };
 }
+
+//[MATCHES]
 
 async function getUserMatches(userId, query) {
   const { limit = 10, cursor, result } = query;
@@ -164,6 +199,96 @@ async function getUserMatches(userId, query) {
     matches,
     hasMore,
     nextCursor,
+  };
+}
+
+//[LEADERBOARD]
+
+async function getLeaderboard(limit = 10, cursor) {
+
+  const users = await prisma.user.findMany({
+    include: 
+    { 
+        players: { where: { game: { status: 'FINISHED' } },
+        include: { game: true } } 
+    }});
+
+  const leaderboard = users.map((user) => {
+    let wins = 0;
+    let total = 0;
+
+    for (const player of user.players) 
+    {
+      const game = player.game;
+      total++;
+      if ((game.winner === 'RED' && player.team === 'RED') ||
+        (game.winner === 'BLUE' && player.team === 'BLUE')) 
+        wins++;
+    }
+
+    return {
+      userId: user.id,
+      username: user.username,
+      wins,
+      totalGames: total,
+      winRate: total > 0 ? (wins / total * 100).toFixed(1) : 0,
+    };
+  });
+
+  leaderboard.sort((a, b) => b.wins - a.wins);
+
+  let startIndex = 0;
+  if (cursor) 
+    {
+        const found = leaderboard.findIndex((u) => u.userId === cursor);
+        if (found !== -1) startIndex = found + 1;
+    }
+
+  const paginated = leaderboard.slice(startIndex, startIndex + limit);
+
+  return {
+    leaderboard: paginated,
+    hasMore: startIndex + limit < leaderboard.length,
+    nextCursor: paginated.length > 0 ? paginated[paginated.length - 1].userId : null,
+  };
+}
+
+async function getMyRank(userId) {
+  const stats = await getUserStats(userId);
+
+  const users = await prisma.user.findMany({
+    include: { players: { where: { game: { status: 'FINISHED' } },
+        include: { game: true } } } 
+    });
+
+  const leaderboard = users.map((user) => {
+    let wins = 0;
+    let total = 0;
+
+    for (const player of user.players) {
+      const game = player.game;
+      total++;
+      if ((game.winner === 'RED' && player.team === 'RED') ||
+        (game.winner === 'BLUE' && player.team === 'BLUE'))
+        wins++;
+    }
+
+    return {
+      userId: user.id,
+      username: user.username,
+      wins,
+      totalGames: total,
+      winRate: total > 0 ? (wins / total * 100).toFixed(1) : 0,
+    };
+  });
+
+  leaderboard.sort((a, b) => b.wins - a.wins);
+
+  const rank = leaderboard.findIndex((u) => u.userId === userId) + 1;
+
+  return {
+    rank: rank > 0 ? rank : null,
+    ...stats,
   };
 }
 
