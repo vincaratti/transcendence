@@ -19,6 +19,8 @@ export function initSocket(server) {
 	});
 
 	io.on('connection', (socket) => {
+		socket.join(`user:${socket.user.userId}`);
+
 		socket.on('join-lobby', (gameCode) => {
 			socket.data.gameCode = gameCode;
 			socket.join(`lobby:${gameCode}`);

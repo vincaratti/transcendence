@@ -4,7 +4,8 @@
 	"type": "module",
 	"scripts": {
 		"dev": "node --experimental-strip-types --watch src/index.js",
-		"start": "node --experimental-strip-types src/index.js"
+		"start": "node --experimental-strip-types src/index.js",
+		"db:generate": "prisma generate"
 	},
 	"dependencies": {
 		"@prisma/adapter-pg": "^7.8.0",
