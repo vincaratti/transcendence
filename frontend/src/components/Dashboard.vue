@@ -48,7 +48,9 @@
 					Play Codenames
 				</button>
 			</section>
+			<Friends />
 		</div>
+		<Toast />
 	</div>
 </template>
 
@@ -56,6 +58,8 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { apiFetch, clearAuth, getStoredUser, setStoredUser } from './utils.js'
+import Friends from './Friends.vue'
+import Toast from './Toast.vue'
 
 const router = useRouter()
 const user = ref(getStoredUser())
