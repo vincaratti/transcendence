@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import prisma from '../services/prisma.js';
 
+
 const router = Router();
 
 router.get('/me', async (req, res) => {
@@ -16,7 +17,6 @@ router.get('/me', async (req, res) => {
   }
 });
 
-
 router.get('/:userId', async (req, res) => {
   try 
   {
@@ -31,10 +31,37 @@ router.get('/:userId', async (req, res) => {
 });
 
 
+router.get('/me/matches', async (req, res) => {
+  try 
+  {
+    const matches = await getUserMatches(req.user.userId, req.query);
+    res.json(matches);
+  } 
+  catch (error) 
+  {
+    console.error('Error fetching match history:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+router.get('/:userId/matches', async (req, res) => {
+  try 
+  {
+    const matches = await getUserMatches(req.params.userId, req.query);
+    res.json(matches);
+  } 
+  catch (error) 
+  {
+    console.error('Error fetching match history:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+
 async function getUserStats(userId) {
   const players = await prisma.player.findMany({
-    where: { userId, game: { status: 'FINISHED',},},
-    include: { game: true, },
+    where: { userId, game: { status: 'FINISHED'} },
+    include: { game: true },
   });
 
   const totalGames = players.length;
@@ -67,6 +94,76 @@ async function getUserStats(userId) {
     winRate: totalGames > 0 ? (wins / totalGames * 100).toFixed(1) : 0,
     redWins,
     blueWins,
+  };
+}
+
+async function getUserMatches(userId, query) {
+  const { limit = 10, cursor, result } = query;
+
+  const where = { userId, game: { status: 'FINISHED' } };
+
+  if (result) {
+    const allPlayers = await prisma.player.findMany(
+        {
+            where: { userId, game: { status: 'FINISHED' } },
+            include: { game: true },
+        });
+
+    const gameIds = allPlayers
+      .filter((p) => { const game = p.game; 
+        const isWin =
+          (game.winner === 'RED' && p.team === 'RED') ||
+          (game.winner === 'BLUE' && p.team === 'BLUE');
+        return result === 'win' ? isWin : !isWin;
+      })
+      .map((p) => p.gameId);
+
+      if (gameIds.length > 0) 
+            where.gameId = { in: gameIds };
+        else
+            return { matches: [], hasMore: false, nextCursor: null };
+  }
+
+  if (cursor) 
+    where.id = { lt: cursor };
+
+  const players = await prisma.player.findMany({
+    where,
+    include: { game: true, },
+    orderBy: { game: { createdAt: 'desc'}},
+    take: parseInt(limit) + 1,
+  });
+
+  let hasMore = false;
+  let nextCursor = null;
+  if (players.length > parseInt(limit)) 
+    {
+    hasMore = true;
+    players.pop();
+    nextCursor = players[players.length - 1]?.id || null;
+  }
+
+  const matches = players.map((player) => {
+    const game = player.game;
+    const isWin =
+      (game.winner === 'RED' && player.team === 'RED') ||
+      (game.winner === 'BLUE' && player.team === 'BLUE');
+
+    return {
+      id: game.id,
+      code: game.code,
+      team: player.team,
+      role: player.role,
+      result: isWin ? 'win' : 'loss',
+      winner: game.winner,
+      createdAt: game.createdAt,
+    };
+  });
+
+  return {
+    matches,
+    hasMore,
+    nextCursor,
   };
 }
 
