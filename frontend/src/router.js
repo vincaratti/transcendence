@@ -3,10 +3,12 @@ import { getAuthToken } from './components/utils.js'
 import Logins from './components/Logins.vue'
 import Codenames from './components/Codenames.vue'
 import Dashboard from './components/Dashboard.vue'
+import Stats from './components/Stats.vue'
 
 const routes = [
 	{ path: '/login', component: Logins, meta: { guest: true } },
 	{ path: '/game/:code', component: Codenames },
+	{ path: '/stats', component: Stats },
 	{ path: '/', component: Dashboard },
 ]
 

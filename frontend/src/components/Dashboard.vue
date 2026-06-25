@@ -3,12 +3,20 @@
 		<div class="max-w-4xl mx-auto px-6 py-10 flex flex-col gap-8">
 			<header class="flex items-center justify-between">
 				<h1 class="text-2xl tracking-widest font-bold uppercase">Transcendence</h1>
-				<button
-					@click="logout"
-					class="px-4 py-1.5 rounded text-xs font-semibold bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition-colors"
-				>
-					Log out
-				</button>
+				<div class="flex items-center gap-2">
+					<RouterLink
+						to="/stats"
+						class="px-4 py-1.5 rounded text-xs font-semibold bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition-colors"
+					>
+						Stats
+					</RouterLink>
+					<button
+						@click="logout"
+						class="px-4 py-1.5 rounded text-xs font-semibold bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition-colors"
+					>
+						Log out
+					</button>
+				</div>
 			</header>
 			<section class="rounded-xl border border-zinc-800 bg-zinc-900/60 p-6">
 				<div class="flex items-center gap-5">
