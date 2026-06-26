@@ -20,10 +20,7 @@
 						{{ isWin(m) ? 'Win' : 'Loss' }}
 					</span>
 					<div class="min-w-0">
-						<p class="text-sm font-medium truncate">vs {{ opponentNames(m) }}</p>
-						<p class="text-xs text-zinc-500 truncate">
-							{{ teamLabel(m) }}<span v-if="teammateNames(m)"> · with {{ teammateNames(m) }}</span>
-						</p>
+						<p class="text-sm font-medium truncate">you, {{ teammateNames(m) }} VS {{ opponentNames(m) }}</p>
 					</div>
 				</div>
 				<span class="shrink-0 text-xs text-zinc-500">{{ formatDate(m.createdAt) }}</span>
@@ -54,6 +51,7 @@ function opponentNames(m) {
 function teammateNames(m) {
 	return names(m.teammates);
 }
+
 function teamLabel(m) {
 	return m.team ? `Team ${m.team.charAt(0) + m.team.slice(1).toLowerCase()}` : '';
 }
@@ -67,7 +65,7 @@ onMounted(async () => {
 		const res = await apiFetch('/stats/me/matches?limit=20');
 		if (!res.ok) throw new Error();
 		const data = await res.json();
-		matches.value = Array.isArray(data) ? data : (data.entries ?? []);
+		matches.value = Array.isArray(data) ? data : (data.matches ?? []);
 	} catch {
 		error.value = 'Could not load match history.';
 	} finally {

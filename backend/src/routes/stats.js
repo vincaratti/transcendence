@@ -7,25 +7,12 @@ const router = Router();
 //[STATS]
 
 router.get('/me', async (req, res) => {
-  try 
+  try
   {
     const stats = await getUserStats(req.user.userId);
     res.json(stats);
-  } 
-  catch (error) 
-  {
-    console.error('Error fetching stats:', error);
-    res.status(500).json({ error: 'Server error' });
   }
-});
-
-router.get('/:userId', async (req, res) => {
-  try 
-  {
-    const stats = await getUserStats(req.params.userId);
-    res.json(stats);
-  } 
-  catch (error) 
+  catch (error)
   {
     console.error('Error fetching stats:', error);
     res.status(500).json({ error: 'Server error' });
@@ -35,25 +22,12 @@ router.get('/:userId', async (req, res) => {
 //[MATCHES]
 
 router.get('/me/matches', async (req, res) => {
-  try 
+  try
   {
     const matches = await getUserMatches(req.user.userId, req.query);
     res.json(matches);
-  } 
-  catch (error) 
-  {
-    console.error('Error fetching match history:', error);
-    res.status(500).json({ error: 'Server error' });
   }
-});
-
-router.get('/:userId/matches', async (req, res) => {
-  try 
-  {
-    const matches = await getUserMatches(req.params.userId, req.query);
-    res.json(matches);
-  } 
-  catch (error) 
+  catch (error)
   {
     console.error('Error fetching match history:', error);
     res.status(500).json({ error: 'Server error' });
@@ -63,13 +37,13 @@ router.get('/:userId/matches', async (req, res) => {
 //[LEADERBOARD]
 
 router.get('/leaderboard', async (req, res) => {
-  try 
+  try
   {
     const { limit = 10, cursor } = req.query;
     const leaderboard = await getLeaderboard(parseInt(limit), cursor);
     res.json(leaderboard);
-  } 
-  catch (error) 
+  }
+  catch (error)
   {
     console.error('Error fetching leaderboard:', error);
     res.status(500).json({ error: 'Server error' });
@@ -77,14 +51,40 @@ router.get('/leaderboard', async (req, res) => {
 });
 
 router.get('/leaderboard/me', async (req, res) => {
-  try 
+  try
   {
     const rank = await getMyRank(req.user.userId);
     res.json(rank);
-  } 
-  catch (error) 
+  }
+  catch (error)
   {
     console.error('Error fetching my rank:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+router.get('/:userId/matches', async (req, res) => {
+  try
+  {
+    const matches = await getUserMatches(req.params.userId, req.query);
+    res.json(matches);
+  }
+  catch (error)
+  {
+    console.error('Error fetching match history:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+router.get('/:userId', async (req, res) => {
+  try
+  {
+    const stats = await getUserStats(req.params.userId);
+    res.json(stats);
+  }
+  catch (error)
+  {
+    console.error('Error fetching stats:', error);
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -164,8 +164,14 @@ async function getUserMatches(userId, query) {
 
   const players = await prisma.player.findMany({
     where,
-    include: { game: true, },
-    orderBy: { game: { createdAt: 'desc'}},
+    include: {
+      game: {
+        include: {
+          players: { include: { user: { select: { username: true } } } },
+        },
+      },
+    },
+    orderBy: { game: { createdAt: 'desc' } },
     take: parseInt(limit) + 1,
   });
 
@@ -184,6 +190,13 @@ async function getUserMatches(userId, query) {
       (game.winner === 'RED' && player.team === 'RED') ||
       (game.winner === 'BLUE' && player.team === 'BLUE');
 
+    const teammates = game.players
+      .filter((p) => p.team === player.team && p.userId !== userId)
+      .map((p) => ({ username: p.user.username }));
+    const opponents = game.players
+      .filter((p) => p.team !== player.team)
+      .map((p) => ({ username: p.user.username }));
+
     return {
       id: game.id,
       code: game.code,
@@ -192,6 +205,8 @@ async function getUserMatches(userId, query) {
       result: isWin ? 'win' : 'loss',
       winner: game.winner,
       createdAt: game.createdAt,
+      teammates,
+      opponents,
     };
   });
 

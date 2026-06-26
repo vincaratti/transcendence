@@ -7,9 +7,9 @@
 				@change="load"
 				class="rounded bg-zinc-800/70 px-2 py-1 text-xs outline-none focus:ring-1 focus:ring-zinc-500"
 			>
-				<option value="rating">Rating</option>
 				<option value="wins">Wins</option>
-				<option value="level">Level</option>
+				<option value="winRate">Win rate</option>
+				<option value="totalGames">Games played</option>
 			</select>
 		</div>
 
@@ -41,7 +41,7 @@ import { apiFetch, getStoredUser } from './utils.js';
 const loading = ref(true);
 const error = ref('');
 const entries = ref([]);
-const metric = ref('rating');
+const metric = ref('wins');
 const meId = getStoredUser()?.id;
 
 function isMe(e) {
@@ -58,7 +58,8 @@ async function load() {
 		const res = await apiFetch(`/stats/leaderboard?metric=${metric.value}&limit=20`);
 		if (!res.ok) throw new Error();
 		const data = await res.json();
-		entries.value = Array.isArray(data) ? data : (data.entries ?? []);
+		entries.value = Array.isArray(data) ? data : (data.leaderboard ?? []);
+		console.log(data);
 	} catch {
 		error.value = 'Could not load leaderboard.';
 	} finally {
