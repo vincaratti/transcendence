@@ -18,6 +18,8 @@ model User {
   friendshipsSent     Friendship[] @relation("FriendshipRequester")
   friendshipsReceived Friendship[] @relation("FriendshipAddressee")
 
+  userAchievements UserAchievement[]
+
   @@map("users")
 }
 

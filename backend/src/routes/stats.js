@@ -63,6 +63,35 @@ router.get('/leaderboard/me', async (req, res) => {
   }
 });
 
+
+// [ACHIEVEMENTS]
+
+router.get('/me/achievements', async (req, res) => {
+  try {
+    const achievements = await getUserAchievements(req.user.userId);
+    res.json(achievements);
+  } 
+  catch (error) 
+  {
+    console.error('Error fetching achievements:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+
+router.get('/:userId/achievements', async (req, res) => {
+  try 
+  {
+    const achievements = await getUserAchievements(req.params.userId);
+    res.json(achievements);
+  } 
+  catch (error) 
+  {
+    console.error('Error fetching achievements:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 router.get('/:userId/matches', async (req, res) => {
   try
   {
@@ -305,6 +334,126 @@ async function getMyRank(userId) {
     rank: rank > 0 ? rank : null,
     ...stats,
   };
+}
+
+//[ACHIEVEMENTS]
+
+async function getUserAchievements(userId) 
+{
+
+  const allAchievements = await prisma.achievement.findMany();
+
+  const unlocked = await prisma.userAchievement.findMany({
+    where: { userId }, include: { achievement: true }, });
+
+  const unlockedIds = new Set(unlocked.map((ua) => ua.achievementId));
+
+  return allAchievements.map((ach) => ({
+    id: ach.id,
+    name: ach.name,
+    description: ach.description,
+    icon: ach.icon,
+    unlocked: unlockedIds.has(ach.id),
+    unlockedAt: unlocked.find((ua) => ua.achievementId === ach.id)?.unlockedAt || null,
+  }));
+}
+
+async function checkAndUnlockAchievements(userId) {
+
+  const stats = await getUserStats(userId);
+
+  const playerGames = await prisma.player.findMany({
+    where: { userId, game: { status: 'FINISHED' } },
+    include: { game: true },
+  });
+
+  let spymasterWins = 0;
+  let operativeWins = 0;
+  let redWins = 0;
+  let blueWins = 0;
+
+  for (const player of playerGames) 
+  {
+    const game = player.game;
+    const isWin = (game.winner === 'RED' && player.team === 'RED') ||
+      (game.winner === 'BLUE' && player.team === 'BLUE');
+    
+    if (isWin) 
+    {
+      if (player.role === 'SPYMASTER')
+        spymasterWins++;
+      else if (player.role === 'OPERATIVE')
+        operativeWins++;
+
+      if (player.team === 'RED') 
+        redWins++;
+      else if (player.team === 'BLUE') 
+        blueWins++;
+    }
+  }
+
+  const allAchievements = await prisma.achievement.findMany();
+
+  const unlocked = await prisma.userAchievement.findMany({
+    where: { userId },});
+  
+  const unlockedIds = new Set(unlocked.map((ua) => ua.achievementId));
+
+  const toUnlock = [];
+
+  for (const ach of allAchievements) 
+  {
+    if (unlockedIds.has(ach.id)) continue;
+
+    let conditionMet = false;
+    switch (ach.condition) 
+    {
+      case '1_win':
+        conditionMet = stats.wins >= 1;
+        break;
+      case '3_wins':
+        conditionMet = stats.wins >= 3;
+        break;
+      case '5_wins':
+        conditionMet = stats.wins >= 5;
+        break;
+      case '1_spymaster_wins':
+        conditionMet = spymasterWins >= 1;
+        break;
+      case '1_operative_wins':
+        conditionMet = operativeWins >= 1;
+        break;
+      case '3_games':
+        conditionMet = stats.totalGames >= 3;
+        break;
+      case '1_red_wins':
+        conditionMet = redWins >= 1;
+        break;
+      case '1_blue_wins':
+        conditionMet = blueWins >= 1;
+        break;
+      default:
+        break;
+    }
+
+    if (conditionMet)
+    {
+      console.log(`Achievement unlocked: ${ach.name} for user ${userId}`); // rm later 
+      toUnlock.push(ach.id);
+    }
+  }
+
+  const unlockedAchievements = [];
+  for (const achievementId of toUnlock) 
+  {
+    const result = await prisma.userAchievement.create({
+      data: { userId, achievementId,},
+      include: { achievement: true,}, });
+
+    unlockedAchievements.push(result.achievement);
+  }
+
+  return unlockedAchievements;
 }
 
 export default router;
