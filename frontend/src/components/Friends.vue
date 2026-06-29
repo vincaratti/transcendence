@@ -53,9 +53,7 @@
 			>
 				<div class="flex items-center gap-3 min-w-0">
 					<div class="relative shrink-0">
-						<div class="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-xs font-bold uppercase">
-							{{ friend.username.slice(0, 2) }}
-						</div>
+						<Avatar :url="friend.avatarUrl" :alt="friend.username" class="w-8 h-8" />
 						<span
 							:class="onlineIds.has(friend.id) ? 'bg-emerald-400' : 'bg-zinc-600'"
 							class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-zinc-900"
@@ -84,6 +82,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { apiFetch } from './utils.js'
 import { getSocket } from '../composables/socket.js'
 import { showToast } from '../composables/toast.js'
+import Avatar from './Avatar.vue'
 
 const friends = ref([])
 const incoming = ref([])

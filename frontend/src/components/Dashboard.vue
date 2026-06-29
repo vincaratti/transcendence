@@ -20,10 +20,23 @@
 			</header>
 			<section class="rounded-xl border border-zinc-800 bg-zinc-900/60 p-6">
 				<div class="flex items-center gap-5">
-					<div
-						class="shrink-0 w-16 h-16 rounded-full bg-gray-700 flex items-center justify-center text-2xl font-bold uppercase"
-					>
-						{{ initials }}
+					<div class="relative shrink-0 group">
+						<Avatar :url="user?.avatarUrl" :alt="displayName" class="w-16 h-16" />
+						<button
+							type="button"
+							@click="fileInput?.click()"
+							:disabled="uploading"
+							class="absolute inset-0 flex items-center justify-center rounded-full bg-black/60 text-[10px] font-semibold uppercase tracking-wide opacity-0 group-hover:opacity-100 transition-opacity disabled:cursor-not-allowed"
+						>
+							{{ uploading ? '…' : 'Change' }}
+						</button>
+						<input
+							ref="fileInput"
+							type="file"
+							accept="image/png,image/jpeg,image/gif,image/webp"
+							class="hidden"
+							@change="uploadAvatar"
+						/>
 					</div>
 					<div class="min-w-0">
 						<h2 class="text-xl font-semibold truncate">{{ displayName }}</h2>
@@ -66,18 +79,17 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { apiFetch, clearAuth, getStoredUser, setStoredUser } from './utils.js'
+import { showToast } from '../composables/toast.js'
+import Avatar from './Avatar.vue'
 import Friends from './Friends.vue'
 import Toast from './Toast.vue'
 
 const router = useRouter()
 const user = ref(getStoredUser())
+const fileInput = ref(null)
+const uploading = ref(false)
 
 const displayName = computed(() => user.value?.username || 'Player')
-
-const initials = computed(() => {
-	const name = user.value?.username || ''
-	return name.slice(0, 2).toUpperCase() || '?'
-})
 
 const memberSince = computed(() => {
 	if (!user.value?.createdAt) return '—'
@@ -104,6 +116,31 @@ onMounted(async () => {
 		setStoredUser(data);
 	}
 });
+
+async function uploadAvatar(event) {
+	const file = event.target.files?.[0]
+	event.target.value = ''
+	if (!file) return
+
+	uploading.value = true
+	try {
+		const formData = new FormData()
+		formData.append('avatar', file)
+		const response = await apiFetch('/users/me/avatar', { method: 'POST', body: formData })
+		const data = await response.json()
+		if (!response.ok) {
+			showToast(data.error || 'Upload failed', { type: 'error' })
+			return
+		}
+		user.value = { ...user.value, avatarUrl: data.user.avatarUrl }
+		setStoredUser(user.value)
+		showToast('Avatar updated')
+	} catch {
+		showToast('Upload failed', { type: 'error' })
+	} finally {
+		uploading.value = false
+	}
+}
 
 async function startGame() {
 	const response = await apiFetch('/game/create', { method: 'POST' })
