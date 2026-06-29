@@ -72,7 +72,7 @@ model Achievement {
   name        String
   description String
   icon        String?
-  condition   String
+  condition   String   @unique
   createdAt   DateTime @default(now())
 
   userAchievements UserAchievement[]
