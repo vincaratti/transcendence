@@ -2,6 +2,7 @@ import { Server } from 'socket.io'
 import jwt from 'jsonwebtoken'
 import { getGame, leaveGame, revealCard, saveGameState, setClue, switchTurn, GAME_STATUS } from './services/game.js'
 import { listFriends } from './services/friends.js'
+import { checkAndUnlockAchievements } from './routes/stats.js'
 
 let io;
 const onlineUsers = new Map();
@@ -98,6 +99,10 @@ export function initSocket(server) {
 				if (!updated) return;
 				const saved = await saveGameState(updated);
 				io.to(`lobby:${gameCode}`).emit('game-updated', saved);
+				if (saved.status === GAME_STATUS.FINISHED) {
+					for (const p of saved.players)
+						await checkAndUnlockAchievements(p.userId);
+				}
 			} catch (e) {
 				console.error('guess error:', e);
 			}

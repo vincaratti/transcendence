@@ -456,4 +456,5 @@ async function checkAndUnlockAchievements(userId) {
   return unlockedAchievements;
 }
 
+export { checkAndUnlockAchievements };
 export default router;
