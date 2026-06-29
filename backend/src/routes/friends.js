@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import prisma from '../services/prisma.js';
-import { getIO } from '../socket.js';
+import { getIO, isOnline } from '../socket.js';
 import {
 	listFriends,
 	listIncomingRequests,
@@ -29,7 +29,8 @@ function handleError(res, error, context) {
 
 router.get('/', async (req, res) => {
 	try {
-		res.json(await listFriends(req.user.userId));
+		const friends = await listFriends(req.user.userId);
+		res.json(friends.map((f) => ({ ...f, online: isOnline(f.id) })));
 	} catch (error) {
 		handleError(res, error, 'list friends');
 	}
