@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import fs from 'fs';
 import path from 'path';
+import bcrypt from 'bcrypt';
 import prisma from '../services/prisma.js';
 import { uploadAvatar, AVATARS_DIR } from '../middleware/upload.js';
 
@@ -86,7 +87,6 @@ router.put('/me', async (req, res) => {
     if (username) data.username = username;
     if (email) data.email = email;
     if (password) {
-      const bcrypt = await import('bcrypt');
       data.password = await bcrypt.hash(password, 10);
     }
 
