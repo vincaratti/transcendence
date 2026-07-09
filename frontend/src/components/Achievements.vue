@@ -12,12 +12,15 @@
 		<div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-3">
 			<div
 				v-for="a in achievements"
-				:key="a.key"
+				:key="a.id"
 				class="rounded-lg bg-zinc-800/50 px-4 py-3 flex flex-col gap-2"
 				:class="{ 'opacity-50': !a.unlocked }"
 			>
 				<div class="flex items-center justify-between gap-2">
-					<p class="text-sm font-semibold truncate">{{ a.name }}</p>
+					<div class="flex items-center gap-2 min-w-0">
+						<span v-if="a.icon" class="text-base shrink-0">{{ a.icon }}</span>
+						<p class="text-sm font-semibold truncate">{{ a.name }}</p>
+					</div>
 					<span
 						v-if="a.unlocked"
 						class="shrink-0 text-xs font-bold text-emerald-400"
@@ -26,12 +29,6 @@
 					<span v-else class="shrink-0 text-xs text-zinc-600">🔒</span>
 				</div>
 				<p class="text-xs text-zinc-500">{{ a.description }}</p>
-				<template v-if="!a.unlocked && a.progress">
-					<div class="h-1.5 rounded-full bg-zinc-700 overflow-hidden">
-						<div class="h-full bg-zinc-400 transition-all" :style="{ width: progressPct(a) + '%' }"></div>
-					</div>
-					<p class="text-xs text-zinc-600 text-right">{{ a.progress.current }}/{{ a.progress.target }}</p>
-				</template>
 			</div>
 		</div>
 	</section>
@@ -47,11 +44,6 @@ const achievements = ref([]);
 
 const unlockedCount = computed(() => achievements.value.filter((a) => a.unlocked).length);
 
-function progressPct(a) {
-	const t = a.progress?.target || 0
-	if (!t) return 0;
-	return Math.min(100, Math.round((a.progress.current / t) * 100));
-}
 function formatDate(d) {
 	return new Date(d).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
 }

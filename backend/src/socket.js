@@ -1,9 +1,37 @@
 import { Server } from 'socket.io'
 import jwt from 'jsonwebtoken'
 import { getGame, leaveGame, revealCard, saveGameState, setClue, switchTurn, GAME_STATUS } from './services/game.js'
+import { listFriends } from './services/friends.js'
+import { checkAndUnlockAchievements } from './routes/stats.js'
 import { registerChat } from "./sockets/chatsocket.js"
 
 let io;
+const onlineUsers = new Map();
+
+export function isOnline(userId) {
+	const sockets = onlineUsers.get(userId);
+	return sockets ? sockets.size > 0 : false;
+}
+
+async function broadcastOnlineStatus(socket, userId) {
+	try {
+		const friends = await listFriends(userId);
+		const onlineFriendIds = friends.filter((f) => isOnline(f.id)).map((f) => f.id);
+		socket.emit('friends-online-status', onlineFriendIds);
+		friends.forEach((f) => io.to(`user:${f.id}`).emit('friend-online', { userId }));
+	} catch (e) {
+		console.error('broadcastOnlineStatus error:', e);
+	}
+}
+
+async function notifyFriendsOffline(userId) {
+	try {
+		const friends = await listFriends(userId);
+		friends.forEach((f) => io.to(`user:${f.id}`).emit('friend-offline', { userId }));
+	} catch (e) {
+		console.error('notifyFriendsOffline error:', e);
+	}
+}
 
 export function initSocket(server) {
 	io = new Server(server, { path: '/ws/' });
@@ -20,7 +48,13 @@ export function initSocket(server) {
 	});
 
 	io.on('connection', (socket) => {
-		socket.join(`user:${socket.user.userId}`);
+		const userId = socket.user.userId;
+		socket.join(`user:${userId}`);
+
+		if (!onlineUsers.has(userId)) onlineUsers.set(userId, new Set());
+		const userSockets = onlineUsers.get(userId);
+		userSockets.add(socket.id);
+		if (userSockets.size === 1) broadcastOnlineStatus(socket, userId);
 
 		socket.on('join-lobby', (gameCode) => {
 			socket.data.gameCode = gameCode;
@@ -66,6 +100,10 @@ export function initSocket(server) {
 				if (!updated) return;
 				const saved = await saveGameState(updated);
 				io.to(`lobby:${gameCode}`).emit('game-updated', saved);
+				if (saved.status === GAME_STATUS.FINISHED) {
+					for (const p of saved.players)
+						await checkAndUnlockAchievements(p.userId);
+				}
 			} catch (e) {
 				console.error('guess error:', e);
 			}
@@ -86,13 +124,22 @@ export function initSocket(server) {
 		});
 
 		socket.on('disconnect', async () => {
+			const userSockets = onlineUsers.get(userId);
+			if (userSockets) {
+				userSockets.delete(socket.id);
+				if (userSockets.size === 0) {
+					onlineUsers.delete(userId);
+					notifyFriendsOffline(userId);
+				}
+			}
+
 			const gameCode = socket.data.gameCode;
 			if (!gameCode) return;
 			try {
 				const game = await getGame(gameCode);
 				if (game && game.status === GAME_STATUS.WAITING) {
-					await leaveGame(gameCode, socket.user.userId);
-					socket.to(`lobby:${gameCode}`).emit('player-left', socket.user.userId);
+					await leaveGame(gameCode, userId);
+					socket.to(`lobby:${gameCode}`).emit('player-left', userId);
 				}
 			} catch (e) {
 				console.error('disconnect leave error:', e);

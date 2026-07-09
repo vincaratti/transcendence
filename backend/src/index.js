@@ -1,6 +1,7 @@
 import express from 'express'
 import { createServer } from 'http'
 import { authenticate } from './middleware/auth.js'
+import { UPLOADS_DIR } from './middleware/upload.js'
 import { initSocket } from './socket.js'
 import gameRoutes from "./routes/game.js"
 import userRoutes from "./routes/user.js"
@@ -15,6 +16,7 @@ initSocket(server);
 const PORT = process.env.BACKEND_PORT;
 
 app.use(express.json());
+app.use("/uploads", express.static(UPLOADS_DIR))
 app.use("/game", authenticate, gameRoutes)
 app.use("/users", authenticate, userRoutes)
 app.use("/friends", authenticate, friendRoutes)

@@ -52,10 +52,19 @@
 				class="flex items-center justify-between rounded-lg bg-zinc-800/50 px-4 py-2"
 			>
 				<div class="flex items-center gap-3 min-w-0">
-					<div class="shrink-0 w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-xs font-bold uppercase">
-						{{ friend.username.slice(0, 2) }}
+					<div class="relative shrink-0">
+						<Avatar :url="friend.avatarUrl" :alt="friend.username" class="w-8 h-8" />
+						<span
+							:class="onlineIds.has(friend.id) ? 'bg-emerald-400' : 'bg-zinc-600'"
+							class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-zinc-900"
+						/>
 					</div>
-					<span class="text-sm font-medium truncate">{{ friend.username }}</span>
+					<div class="flex flex-col min-w-0">
+						<span class="text-sm font-medium truncate">{{ friend.username }}</span>
+						<span :class="onlineIds.has(friend.id) ? 'text-emerald-400' : 'text-zinc-500'" class="text-xs">
+							{{ onlineIds.has(friend.id) ? 'Online' : 'Offline' }}
+						</span>
+					</div>
 				</div>
 					<button
 					@click="dm(friend)"
@@ -80,16 +89,22 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { apiFetch } from './utils.js'
 import { getSocket } from '../composables/socket.js'
 import { showToast } from '../composables/toast.js'
+import Avatar from './Avatar.vue'
 
 const friends = ref([])
 const incoming = ref([])
+const onlineIds = ref(new Set())
 const newFriend = ref('')
 const message = ref('')
 const messageOk = ref(false)
 
 async function loadFriends() {
 	const res = await apiFetch('/friends')
-	if (res.ok) friends.value = await res.json()
+	if (res.ok) {
+		const data = await res.json()
+		friends.value = data
+		onlineIds.value = new Set(data.filter((f) => f.online).map((f) => f.id))
+	}
 }
 
 async function loadRequests() {
@@ -148,16 +163,40 @@ function dm(friend) {
   emit('dm', friend.username)
 }
 
-const events = ['friend-request-received', 'friend-request-accepted', 'friend-removed'];
+const refreshEvents = ['friend-request-received', 'friend-request-accepted', 'friend-removed'];
 let socket = null;
+
+function onFriendsOnlineStatus(ids) {
+	onlineIds.value = new Set([...onlineIds.value, ...ids])
+}
+
+function onFriendOnline({ userId }) {
+	const ids = new Set(onlineIds.value)
+	ids.add(userId)
+	onlineIds.value = ids
+}
+
+function onFriendOffline({ userId }) {
+	const ids = new Set(onlineIds.value)
+	ids.delete(userId)
+	onlineIds.value = ids
+}
 
 onMounted(() => {
 	refresh();
 	socket = getSocket()
-	events.forEach((e) => socket.on(e, refresh));
+	refreshEvents.forEach((e) => socket.on(e, refresh));
+	socket.on('friends-online-status', onFriendsOnlineStatus)
+	socket.on('friend-online', onFriendOnline)
+	socket.on('friend-offline', onFriendOffline)
 })
 
 onUnmounted(() => {
-	if (socket) events.forEach((e) => socket.off(e, refresh));
+	if (socket) {
+		refreshEvents.forEach((e) => socket.off(e, refresh));
+		socket.off('friends-online-status', onFriendsOnlineStatus)
+		socket.off('friend-online', onFriendOnline)
+		socket.off('friend-offline', onFriendOffline)
+	}
 })
 </script>

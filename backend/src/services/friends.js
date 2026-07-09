@@ -1,6 +1,6 @@
 import prisma from './prisma.js';
 
-const FRIEND_USER_SELECT = { id: true, username: true };
+const FRIEND_USER_SELECT = { id: true, username: true, avatarUrl: true };
 
 export async function findRelationship(a, b) {
 	return prisma.friendship.findFirst({
