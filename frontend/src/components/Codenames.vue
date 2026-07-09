@@ -101,6 +101,8 @@
 			You are <span class="text-white">{{ myPlayer.role }}</span> on
 			<span :class="myPlayer.team === 'RED' ? 'text-red-400' : 'text-blue-400'">{{ myPlayer.team }}</span> team
 		</div>
+		<Chat/>
+
 	</div>
 </template>
 
@@ -110,6 +112,7 @@ import { useRoute } from 'vue-router'
 import { apiFetch, getStoredUser } from './utils.js'
 import { getSocket } from '../composables/socket.js'
 import Lobby from './Lobby.vue'
+import Chat from './Messages.vue'
 
 const route = useRoute();
 const socket = getSocket();

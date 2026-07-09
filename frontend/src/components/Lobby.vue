@@ -70,6 +70,7 @@
 			Start Game
 		</button>
 		<div v-else class="text-zinc-600 text-xs">Waiting for all players to join...</div>
+			<Chat/>
 	</div>
 </template>
 
@@ -77,6 +78,8 @@
 import { computed, onMounted, onUnmounted } from 'vue'
 import { getStoredUser } from './utils.js'
 import { getSocket } from '../composables/socket.js'
+import Chat from './Messages.vue'
+
 
 const props = defineProps({
 	game: { type: Object, required: true },
