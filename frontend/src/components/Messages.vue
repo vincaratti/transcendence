@@ -6,11 +6,14 @@
     :class="{ 'dm': m.to !== null, 'error': m.type === 'msgToSelf' }">
       
       <span v-if="m.to">[DM → {{ m.to }}] </span>
-  <b>
+  <b v-if="m.type !== 'msgToSelf' ">
     <button @click="toggleMenu(m.fromUsername)" class="hover:underline cursor-pointer">
       {{ m.fromUsername }}
     </button>:
-  </b> {{ m.content }}
+    
+  </b>
+    <span v-else> {{ m.fromUsername }} </span>
+   {{ m.content }}
   <div v-if="activeMenu === m.fromUsername"    style="position: absolute; left: 0; top: 90%; z-index: 50; background: #27272a; border: 1px solid #3f3f46; border-radius: 8px; min-width: 150px; padding: 4px 0"
   >
     <button @click="menuAction('dm', m.fromUsername)"       class="menu-item">💬 DM</button>
