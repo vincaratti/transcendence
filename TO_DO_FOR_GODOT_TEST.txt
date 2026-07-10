@@ -1,0 +1,13 @@
+Déplacer le dossier GodotGame vers l'emplacement de votre choix (exemple : dans le même dossier que l'index.html).
+
+S'assurer que le serveur ait bien accès aux fichiers du dossiers (nginx.conf)
+
+Normalement, si je ne me suis pas foiré, on devrait alors pouvoir lancer le jeu en entrant le relative path du fichier GodotGame/game.html en tant qu'URL, comme le reste des pages du serveur.
+
+
+
+Note 1 : Le jeu qui s'ouvrirait si cela fonctionne n'est pas la dernière version en date.
+
+Note 2 : Si quelqu'un a du temps libre, il peut jouer avec les fichiers html et faire un template pour pouvoir choisir, avant de lancer le jeu, si on va sur une seed random (de préférence qui change journalièrement ou par semaine, afin de pouvoir éventuellement comparer des scores) ou bien une seed spécifique. 
+Pour l'envoi de données du serveur vers le jeu ainsi que jeu vers serveur, à priori, on peut recevoir et envoyer des requêtes/réponses HTTPS depuis le jeu, donc un body/query genre "daily_<randomlygeneratedseed>" ou "set_<userchosenseed>", cela devrait être simple de récupérer de mon côté quand j'aurai fini avec le coeur du jeu.
+Rajouter un bouton quelque part sur l'index ou autre qui renvoie vers cette dite page serait bien aussi.
