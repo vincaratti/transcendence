@@ -113,7 +113,8 @@
 					Play Codenames
 				</button>
 			</section>
-			<Friends />
+			<Friends @dm="startDm"/>
+			<Chat :prefill="dmTarget" />
 		</div>
 		<Toast />
 	</div>
@@ -127,7 +128,7 @@ import { showToast } from '../composables/toast.js'
 import Avatar from './Avatar.vue'
 import Friends from './Friends.vue'
 import Toast from './Toast.vue'
-
+import Chat from './Messages.vue'
 const router = useRouter()
 const user = ref(getStoredUser())
 const fileInput = ref(null)
@@ -242,5 +243,9 @@ async function startGame() {
 function logout() {
 	clearAuth()
 	router.push('/login')
+}
+const dmTarget = ref('')
+const startDm = (username) => {
+  dmTarget.value = `/w ${username} `
 }
 </script>

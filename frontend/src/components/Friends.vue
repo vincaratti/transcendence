@@ -66,6 +66,13 @@
 						</span>
 					</div>
 				</div>
+					<button
+					@click="dm(friend)"
+					class="px-3 py-1 rounded text-xs font-semibold text-zinc-400 hover:text-red-400 transition-colors shrink-0"
+				>
+					DM
+				</button>
+
 				<button
 					@click="remove(friend.id)"
 					class="px-3 py-1 rounded text-xs font-semibold text-zinc-400 hover:text-red-400 transition-colors shrink-0"
@@ -149,6 +156,11 @@ async function decline(id) {
 async function remove(userId) {
 	const res = await apiFetch(`/friends/${userId}`, { method: 'DELETE' });
 	if (res.ok) refresh();
+}
+const emit = defineEmits(['dm'])
+
+function dm(friend) {
+  emit('dm', friend.username)
 }
 
 const refreshEvents = ['friend-request-received', 'friend-request-accepted', 'friend-removed'];

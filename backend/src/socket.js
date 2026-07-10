@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken'
 import { getGame, leaveGame, revealCard, saveGameState, setClue, switchTurn, GAME_STATUS } from './services/game.js'
 import { listFriends } from './services/friends.js'
 import { checkAndUnlockAchievements } from './routes/stats.js'
+import { registerChat } from "./sockets/chatsocket.js"
 
 let io;
 const onlineUsers = new Map();
@@ -145,7 +146,7 @@ export function initSocket(server) {
 			}
 		});
 	});
-
+	registerChat(io)
 	return io;
 }
 
