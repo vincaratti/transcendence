@@ -57,7 +57,7 @@ const {
   sendMessage,
   sendTyping,
 } = useChatSocket({
-  url: "https://localhost/ws/chat",
+  url: "/ws/chat",
   token: localStorage.getItem("authToken"),
 });
 const Whispering = (message) => {
