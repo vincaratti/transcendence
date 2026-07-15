@@ -211,7 +211,7 @@ export function registerChat(io) {
             fromUsername: socket.data.username
           }
         }
-        chatNamespace.emit('message', typingFrame)
+        chatNamespace.except(`user:${socket.data.userId}`).emit('message', typingFrame)
       }
 
       if (frame.type === 'read') {

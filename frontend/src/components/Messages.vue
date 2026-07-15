@@ -1,44 +1,70 @@
 <template>
-  <div class="chat" @click.self="closeMenu">
-  <div v-if="status !== 'authenticated'">Status: {{ status }}<span v-if="lastError"> ({{ lastError }})</span></div>
-  <div class="messages" ref="messagesContainer" style="max-height: 300px; overflow-y: auto;">
-    <div v-for="m in messages" :key="m.id"
-    :class="{ 'dm': m.to !== null, 'error': m.type === 'msgToSelf' }">
-      
-      <span v-if="m.to">[DM → {{ m.to }}] </span>
-  <b v-if="m.type !== 'msgToSelf' ">
-    <button @click="toggleMenu(m.fromUsername)" class="hover:underline cursor-pointer">
-      {{ m.fromUsername }}
-    </button>:
-    
-  </b>
-    <span v-else> {{ m.fromUsername }} </span>
-   {{ m.content }}
-  <div v-if="activeMenu === m.fromUsername"    style="position: absolute; left: 0; top: 90%; z-index: 50; background: #27272a; border: 1px solid #3f3f46; border-radius: 8px; min-width: 150px; padding: 4px 0"
-  >
-    <button @click="menuAction('dm', m.fromUsername)"       class="menu-item">💬 DM</button>
-    <button @click="menuAction('friend', m.fromUsername)"   class="menu-item">➕ Add friend</button>
-    <button  v-if="!blockedUsers.has(m.from)"
-    @click="menuAction('block', m.fromUsername, m.from)" class="menu-item">🚫 Block</button>
-    <button v-else 
-    @click="menuAction('unblock', m.fromUsername, m.from)" class="menu-item">✅ Unblock</button>
-    <button @click="menuAction('profile', m.fromUsername)"  class="menu-item">👤 See profile</button>
-    </div>
-  </div>
-  </div>
-  <div v-if="typing.length">
-  <span v-if="typing.length > 3">Multiple people are typing...</span>
-  <span v-else-if="typing.length > 1">{{ typing.join(", ") }} are typing...</span>
-  <span v-else>{{ typing[0] }} is typing...</span>
-  </div>
-    <input 
-      v-model="text"
-      @input="onTyping"
-      @keyup.enter="send"
-      placeholder="message..."
-    />
-    <button @click="send">Send</button>
-  </div>
+	<section class="rounded-xl border border-zinc-800 bg-zinc-900/60 p-6 flex flex-col gap-4" @click.self="closeMenu">
+		<div class="flex items-center justify-between gap-3">
+			<h2 class="text-lg font-semibold uppercase tracking-wide">Chat</h2>
+			<span v-if="status !== 'authenticated'" class="text-xs text-zinc-500 truncate">
+				{{ status }}<span v-if="lastError" class="text-red-400"> ({{ lastError }})</span>
+			</span>
+		</div>
+
+		<div
+			ref="messagesContainer"
+			class="flex flex-col gap-1 h-72 overflow-y-auto rounded-lg bg-zinc-800/50 px-4 py-3"
+		>
+			<p v-if="!messages.length" class="text-sm text-zinc-500">No messages yet.</p>
+			<div v-for="m in messages" :key="m.id" class="relative text-sm leading-relaxed break-words">
+				<span v-if="m.to" class="text-xs font-medium text-pink-400">[DM → {{ m.to }}]</span>
+				<template v-if="m.type !== 'msgToSelf'">
+					<button
+						@click="toggleMenu(m.id)"
+						class="font-semibold text-zinc-200 hover:underline cursor-pointer"
+					>
+						{{ m.fromUsername }}</button><span class="text-zinc-500">:</span>
+				</template>
+				<span v-else class="font-semibold text-red-400">{{ m.fromUsername }}:</span>
+				<span :class="contentClass(m)">{{ m.content }}</span>
+				<div
+					v-if="activeMenu === m.id"
+					class="absolute left-0 top-full z-50 mt-1 min-w-[150px] rounded-lg border border-zinc-700 bg-zinc-800 py-1 shadow-lg shadow-black/40"
+				>
+					<button @click="menuAction('dm', m.fromUsername)" class="w-full text-left px-3 py-1.5 text-xs text-zinc-300 hover:bg-zinc-700 transition-colors">💬 DM</button>
+					<button
+						v-if="!blockedUsers.has(m.from)"
+						@click="menuAction('block', m.fromUsername, m.from)"
+						class="w-full text-left px-3 py-1.5 text-xs text-zinc-300 hover:bg-zinc-700 transition-colors"
+					>🚫 Block</button>
+					<button
+						v-else
+						@click="menuAction('unblock', m.fromUsername, m.from)"
+						class="w-full text-left px-3 py-1.5 text-xs text-zinc-300 hover:bg-zinc-700 transition-colors"
+					>✅ Unblock</button>
+				</div>
+			</div>
+		</div>
+
+		<p class="h-4 text-xs italic text-zinc-500">
+			<template v-if="typing.length > 3">Multiple people are typing...</template>
+			<template v-else-if="typing.length > 1">{{ typing.join(", ") }} are typing...</template>
+			<template v-else-if="typing.length === 1">{{ typing[0] }} is typing...</template>
+		</p>
+
+		<div class="flex gap-2">
+			<input
+				v-model="text"
+				@input="onTyping"
+				@keyup.enter="send"
+				placeholder="Message, or /w <user> to whisper"
+				class="flex-1 min-w-0 rounded bg-zinc-800/70 px-3 py-2 text-sm placeholder-zinc-500 outline-none focus:ring-1 focus:ring-zinc-500"
+			/>
+			<button
+				@click="send"
+				:disabled="!text.trim()"
+				class="px-4 py-2 rounded text-sm font-semibold bg-zinc-200 text-zinc-900 hover:bg-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+			>
+				Send
+			</button>
+		</div>
+	</section>
 </template>
 
 <script setup>
@@ -112,20 +138,22 @@ const send = async () => {
 const onTyping = () => {
   sendTyping();
 };
-// For friend dm
+// For friend dm, keyed by message id so the menu opens on one line only
 const activeMenu = ref(null)
 
-const toggleMenu = (username) => {
-  activeMenu.value = activeMenu.value === username ? null : username
+const toggleMenu = (messageId) => {
+  activeMenu.value = activeMenu.value === messageId ? null : messageId
 }
-const emit = defineEmits(['friend-request'])
 
+const contentClass = (m) => {
+  if (m.type === 'msgToSelf') return 'text-red-400 italic'
+  if (m.to) return 'text-pink-300 italic'
+  return 'text-zinc-300'
+}
 const menuAction = async (action, username, userId) => {
   activeMenu.value = null
   if (action === 'dm') {
     text.value = `/w ${username} `
-  } else if (action === 'friend') {
-    emit('friend-request', username) // delegate to friends.vue
   } else if (action === 'block') {
       if (!userId) {
         console.error('no userId for block')
@@ -160,9 +188,6 @@ const menuAction = async (action, username, userId) => {
       } catch (e) {
         console.error('failed to unblock user', e)
       }
-  }
-  else if (action === 'profile') {
-    //show stats idk maybe emit event to stat
   }
 }
 
@@ -207,13 +232,3 @@ onMounted(async () => {
   
 })
 </script>
-<style scoped>
-.dm {
-  color: pink;
-  font-style: italic;
-}
-.error {
-  color: red;
-  font-style: italic;
-}
-</style>
