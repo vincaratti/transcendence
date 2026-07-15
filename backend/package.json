@@ -8,6 +8,7 @@
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:generate": "prisma generate",
+    "db:seed": "node --experimental-strip-types prisma/seed.js",
     "db:status": "prisma migrate status",
     "db:studio": "prisma studio"
   },

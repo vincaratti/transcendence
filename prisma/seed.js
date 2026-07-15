@@ -1,5 +1,5 @@
 import { PrismaPg } from '@prisma/adapter-pg';
-import { PrismaClient } from '../backend/src/generated/prisma/client.js';
+import { PrismaClient } from '../src/generated/prisma/client.ts';
 
 const host = process.env.DB_HOST ?? 'localhost';
 const port = process.env.DB_PORT ?? '5433';
@@ -28,7 +28,9 @@ async function main() {
     });
   }
 
-  console.log('Achievements seeded');
+  console.log(`Achievements seeded (${achievements.length})`);
 }
 
-main().catch(console.error).finally(() => prisma.$disconnect());
+main()
+  .catch((error) => console.error('Achievement seeding failed:', error))
+  .finally(() => prisma.$disconnect());
