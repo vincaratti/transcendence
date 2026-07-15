@@ -4,6 +4,7 @@ import path from 'path';
 import bcrypt from 'bcrypt';
 import prisma from '../services/prisma.js';
 import { uploadAvatar, AVATARS_DIR } from '../middleware/upload.js';
+import { validateProfileUpdate } from '../validation.js';
 
 const router = Router();
 
@@ -65,8 +66,14 @@ router.get('/:id', async (req, res) => {
 
 
 router.put('/me', async (req, res) => {
-  const { username, email, password } = req.body;
+  const { data: fields, error } = validateProfileUpdate(req.body);
   const userId = req.user.userId;
+
+  if (error) {
+    return res.status(400).json({ error });
+  }
+
+  const { username, email, password } = fields;
 
   try {
     if (username) {
