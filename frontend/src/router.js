@@ -4,6 +4,7 @@ import Logins from './components/Logins.vue'
 import Codenames from './components/Codenames.vue'
 import Dashboard from './components/Dashboard.vue'
 import Stats from './components/Stats.vue'
+import GodotGame from './components/GodotGame.vue'
 import Privacy from './components/Privacy.vue'
 import Terms from './components/Terms.vue'
 import NotFound from './components/NotFound.vue'
@@ -13,6 +14,7 @@ const routes = [
 	{ path: '/privacy', component: Privacy, meta: { guest: true } },
 	{ path: '/terms', component: Terms, meta: { guest: true } },
 	{ path: '/game/:code', component: Codenames },
+	{ path: '/godot', component: GodotGame },
 	{ path: '/stats', component: Stats },
 	{ path: '/', component: Dashboard },
 	{ path: '/:pathMatch(.*)*', component: NotFound, meta: { guest: true } },

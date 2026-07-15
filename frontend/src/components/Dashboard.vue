@@ -111,13 +111,26 @@
 				</div>
 			</section>
 			<section class="flex flex-col gap-3">
-				<p class="text-zinc-500 text-sm">Create a new game or join an existing one.</p>
-				<button
-					@click="startGame"
-					class="self-start px-5 py-2 rounded text-sm font-semibold bg-zinc-200 text-zinc-900 hover:bg-white transition-colors"
-				>
-					Play Codenames
-				</button>
+				<div class="flex items-center justify-between gap-3">
+					<div>
+						<p class="text-zinc-500 text-sm mb-3">Create a new game or join an existing one.</p>
+						<button
+							@click="startGame"
+							class="self-start px-5 py-2 rounded text-sm font-semibold bg-zinc-200 text-zinc-900 hover:bg-white transition-colors"
+						>
+							Play Codenames
+						</button>
+					</div>
+					<div class="text-right">
+						<p class="text-zinc-500 text-sm mb-3">Solo game (unranked)</p>
+						<RouterLink
+							to="/godot"
+							class="self-start px-5 py-2 rounded text-sm font-semibold bg-zinc-200 text-zinc-900 hover:bg-white transition-colors"
+						>
+							Play Arcade Game
+						</RouterLink>
+					</div>
+				</div>
 			</section>
 			<Friends @dm="startDm"/>
 			<Chat :prefill="dmTarget" />
