@@ -59,7 +59,6 @@ async function load() {
 		if (!res.ok) throw new Error();
 		const data = await res.json();
 		entries.value = Array.isArray(data) ? data : (data.leaderboard ?? []);
-		console.log(data);
 	} catch {
 		error.value = 'Could not load leaderboard.';
 	} finally {

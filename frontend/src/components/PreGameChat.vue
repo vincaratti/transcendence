@@ -77,7 +77,7 @@ messages(
     }
     if (!user || !token)
     {
-        console.log('THIS SHOULDNT HAPPEN SOMETHING WENT VERY WRONG')
+        //console.log('THIS SHOULDNT HAPPEN SOMETHING WENT VERY WRONG')
         //emit
     }
       onMounted(() => {

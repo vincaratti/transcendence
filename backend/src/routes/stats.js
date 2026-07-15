@@ -438,7 +438,6 @@ async function checkAndUnlockAchievements(userId) {
 
     if (conditionMet)
     {
-      console.log(`Achievement unlocked: ${ach.name} for user ${userId}`); // rm later 
       toUnlock.push(ach.id);
     }
   }
