@@ -1,6 +1,6 @@
 <template>
   <div class="chat" @click.self="closeMenu">
-  <div v-if="status !== 'authenticated'">Status: {{ status }}</div>
+  <div v-if="status !== 'authenticated'">Status: {{ status }}<span v-if="lastError"> ({{ lastError }})</span></div>
   <div class="messages" ref="messagesContainer" style="max-height: 300px; overflow-y: auto;">
     <div v-for="m in messages" :key="m.id"
     :class="{ 'dm': m.to !== null, 'error': m.type === 'msgToSelf' }">
@@ -52,6 +52,7 @@ const messagesContainer = ref(null); // to scroll down when mounting
 var sentTo = null;
 const {
   status,
+  lastError,
   messages,
   typing,
   sendMessage,

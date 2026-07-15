@@ -4,6 +4,7 @@ import { io } from "socket.io-client";
 export function useChatSocket({ url, token }) {
   let socket = null;                     
   const status = ref("disconnected");
+  const lastError = ref(null);
   const messages = ref([]);
   const typing = ref([]);
   const onlineUsers = ref(new Set());
@@ -27,7 +28,7 @@ export function useChatSocket({ url, token }) {
 
     socket.on("connect_error", (err) => {
       status.value = "error";
-      console.error("Socket error:", err.message);
+      lastError.value = err.message;
     });
 
     socket.on("message", (frame) => {
@@ -96,5 +97,5 @@ export function useChatSocket({ url, token }) {
 
   onMounted(connect);
   onUnmounted(() => socket?.disconnect());       
-  return { status, messages, typing, onlineUsers, sendMessage, sendTyping, sendRead };
+  return { status, lastError, messages, typing, onlineUsers, sendMessage, sendTyping, sendRead };
 }
