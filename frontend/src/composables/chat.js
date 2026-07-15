@@ -96,6 +96,16 @@ export function useChatSocket({ url, token }) {
   const sendRead = (messageId) => send("read", { messageId });
 
   onMounted(connect);
-  onUnmounted(() => socket?.disconnect());       
+  onUnmounted(() => {
+    const s = socket;
+    socket = null;
+    if (!s) return;
+    if (s.connected) {
+      s.disconnect();
+      return;
+    }
+    s.once("connect", () => s.disconnect());
+    s.once("connect_error", () => s.disconnect());
+  });
   return { status, lastError, messages, typing, onlineUsers, sendMessage, sendTyping, sendRead };
 }

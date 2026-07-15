@@ -59,6 +59,7 @@
 							v-model="editForm.username"
 							type="text"
 							:maxlength="USERNAME_MAX"
+							autocomplete="username"
 							class="rounded bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-zinc-500"
 							placeholder="New username"
 						/>
@@ -68,6 +69,7 @@
 						<input
 							v-model="editForm.email"
 							type="email"
+							autocomplete="email"
 							class="rounded bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-zinc-500"
 							placeholder="New email"
 						/>
