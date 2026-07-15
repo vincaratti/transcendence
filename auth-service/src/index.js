@@ -2,18 +2,35 @@ import express from 'express'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import prisma from './services/prisma.js'
+import { rateLimit } from './middleware/rateLimit.js'
+import { validateLogin, validateRegistration } from './validation.js'
 
 const PORT = process.env.AUTH_PORT
 
 const app = express()
-app.use(express.json())
+app.set('trust proxy', 1)
+app.use(express.json({ limit: '10kb' }))
 
-app.post('/register', async (req, res) => {
-	const { username, email, password } = req.body;
+const loginLimiter = rateLimit({
+	windowMs: 5 * 60 * 1000,
+	max: 30,
+	message: 'Too many login attempts. Please try again in a few minutes.',
+})
 
-	if (!username || !email || !password) {
-		return res.status(400).json({ error: { message: 'All fields are required' } });
+const registerLimiter = rateLimit({
+	windowMs: 60 * 60 * 1000,
+	max: 20,
+	message: 'Too many accounts created from this address. Please try again later.',
+})
+
+app.post('/register', registerLimiter, async (req, res) => {
+	const { data, error } = validateRegistration(req.body);
+
+	if (error) {
+		return res.status(400).json({ error: { message: error } });
 	}
+
+	const { username, email, password } = data;
 
 	try {
 		const existingUsername = await prisma.user.findUnique({ where: { username } })
@@ -50,12 +67,14 @@ app.post('/register', async (req, res) => {
 	}
 })
 
-app.post('/login', async (req, res) => {
-	const { email, password } = req.body;
+app.post('/login', loginLimiter, async (req, res) => {
+	const { data, error } = validateLogin(req.body);
 
-	if (!email || !password) {
-		return res.status(400).json({ error: { message: 'Email and password required' } });
+	if (error) {
+		return res.status(400).json({ error: { message: error } });
 	}
+
+	const { email, password } = data;
 
 	try {
 		const user = await prisma.user.findUnique({
