@@ -30,7 +30,7 @@
 						id="username"
 						v-model="username"
 						type="text"
-						maxlength="20"
+						:maxlength="USERNAME_MAX"
 						autocomplete="username"
 						placeholder="Choose a username"
 						class="w-full bg-zinc-900 border border-zinc-700 rounded px-3 py-2 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors"
@@ -55,11 +55,14 @@
 						id="password"
 						v-model="password"
 						type="password"
-						maxlength="20"
-						autocomplete="current-password"
+						:maxlength="PASSWORD_MAX"
+						:autocomplete="mode === 'signup' ? 'new-password' : 'current-password'"
 						placeholder="Enter your password"
 						class="w-full bg-zinc-900 border border-zinc-700 rounded px-3 py-2 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors"
 					/>
+					<p v-if="mode === 'signup'" class="mt-1 text-xs text-zinc-600">
+						At least 8 characters, including a letter and a number.
+					</p>
 				</div>
 
 				<button
@@ -76,13 +79,26 @@
 
 			<p v-if="error" class="mt-4 text-sm text-red-400 text-center">{{ error }}</p>
 		</div>
+		<p class="text-xs text-zinc-600 text-center">
+			By creating an account you agree to our
+			<RouterLink to="/terms" class="text-zinc-400 underline underline-offset-2 hover:text-zinc-200">
+				Terms of Service</RouterLink>
+			and
+			<RouterLink to="/privacy" class="text-zinc-400 underline underline-offset-2 hover:text-zinc-200">
+				Privacy Policy</RouterLink>.
+		</p>
+		<div class="w-full">
+			<Footer />
+		</div>
 	</div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
 import { setAuthToken, setStoredUser } from './utils.js'
+import { emailError, newPasswordError, usernameError, PASSWORD_MAX, USERNAME_MAX } from '../validation.js'
+import Footer from './Footer.vue'
 
 const router = useRouter()
 
@@ -137,18 +153,8 @@ async function login() {
 }
 
 async function signup() {
-	if (!username.value || !email.value || !password.value) {
-		error.value = 'All fields are required'
-		return
-	}
-
-	if (username.value.length > 20) {
-		error.value = 'Please choose a name under 21 characters'
-		return
-	}
-
-	if (password.value.length > 20) {
-		error.value = 'Please choose a password under 21 characters'
+	error.value = usernameError(username.value) || emailError(email.value) || newPasswordError(password.value)
+	if (error.value) {
 		return
 	}
 

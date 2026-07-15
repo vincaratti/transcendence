@@ -15,6 +15,7 @@
 			<MatchHistory />
 			<Leaderboard />
 			<Achievements />
+			<Footer />
 		</div>
 		<Toast />
 	</div>
@@ -27,4 +28,5 @@ import MatchHistory from './MatchHistory.vue'
 import Leaderboard from './Leaderboard.vue'
 import Achievements from './Achievements.vue'
 import Toast from './Toast.vue'
+import Footer from './Footer.vue'
 </script>

@@ -58,6 +58,7 @@
 						<input
 							v-model="editForm.username"
 							type="text"
+							:maxlength="USERNAME_MAX"
 							class="rounded bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-zinc-500"
 							placeholder="New username"
 						/>
@@ -76,9 +77,12 @@
 						<input
 							v-model="editForm.password"
 							type="password"
+							:maxlength="PASSWORD_MAX"
+							autocomplete="new-password"
 							class="rounded bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-zinc-500"
 							placeholder="Leave blank to keep current"
 						/>
+						<p class="text-xs text-zinc-600">At least 8 characters, including a letter and a number.</p>
 					</div>
 					<button
 						type="submit"
@@ -115,6 +119,7 @@
 			</section>
 			<Friends @dm="startDm"/>
 			<Chat :prefill="dmTarget" />
+			<Footer />
 		</div>
 		<Toast />
 	</div>
@@ -124,11 +129,13 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { apiFetch, clearAuth, getStoredUser, setStoredUser } from './utils.js'
+import { emailError, newPasswordError, usernameError, PASSWORD_MAX, USERNAME_MAX } from '../validation.js'
 import { showToast } from '../composables/toast.js'
 import Avatar from './Avatar.vue'
 import Friends from './Friends.vue'
 import Toast from './Toast.vue'
 import Chat from './Messages.vue'
+import Footer from './Footer.vue'
 const router = useRouter()
 const user = ref(getStoredUser())
 const fileInput = ref(null)
@@ -183,6 +190,16 @@ async function saveProfile() {
 
 	if (!Object.keys(body).length) {
 		editing.value = false
+		return
+	}
+
+	const invalid =
+		(body.username !== undefined && usernameError(body.username)) ||
+		(body.email !== undefined && emailError(body.email)) ||
+		(body.password !== undefined && newPasswordError(body.password))
+
+	if (invalid) {
+		showToast(invalid, { type: 'error' })
 		return
 	}
 
