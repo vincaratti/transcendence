@@ -114,34 +114,35 @@ async function joinGame(code, userId, team, role) {
 	});
 }
 
+function hasUnrevealed(board, type) {
+	return board.some((card) => card.type == type && !card.revealed);
+}
+
 function revealCard(game, index) {
 	const board = game.board;
 
-	if (index < 0 || board[index].revealed || game.status != GAME_STATUS.IN_PROGRESS || game.remainingGuess <= 0)
+	if (!Number.isInteger(index) || index < 0 || index >= board.length)
+		return ;
+	if (board[index].revealed || game.status != GAME_STATUS.IN_PROGRESS || game.remainingGuess <= 0)
 		return ;
 	board[index].revealed = true;
 
-	if (board[index].type == CARD_TYPES.ASSASSIN) {
+	const revealed = board[index].type;
+
+	if (revealed == CARD_TYPES.ASSASSIN) {
 		game.status = GAME_STATUS.FINISHED;
 		game.winner = game.currentTeam === CARD_TYPES.RED ? CARD_TYPES.BLUE : CARD_TYPES.RED;
 		return game;
 	}
-	else if (board[index].type != game.currentTeam) {
-		game = switchTurn(game);
+
+	if ((revealed == CARD_TYPES.RED || revealed == CARD_TYPES.BLUE) && !hasUnrevealed(board, revealed)) {
+		game.status = GAME_STATUS.FINISHED;
+		game.winner = revealed;
 		return game;
 	}
 
-	let foundUnrevealed = false;
-	for (const card of board) {
-		if (card.type == game.currentTeam && !card.revealed) {
-			foundUnrevealed = true;
-			break ;
-		}
-	}
-	if (!foundUnrevealed) {
-		game.status = GAME_STATUS.FINISHED;
-		game.winner = game.currentTeam;
-		return game;
+	if (revealed != game.currentTeam) {
+		return switchTurn(game);
 	}
 
 	game.remainingGuess --;
