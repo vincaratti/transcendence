@@ -219,7 +219,7 @@ user_achievements  (junction: users ↔ achievements)
 
 ## Modules
 
-**Total claimed: 16 points** (requirement: 14)
+**Total claimed: 19 points** (requirement: 14)
 
 | Module | Category | Type | Points | Implemented by |
 |---|---|---|---|---|
@@ -227,13 +227,14 @@ user_achievements  (junction: users ↔ achievements)
 | Real-time features via WebSockets (Socket.io) | Web | Major | 2 | arcornil |
 | User interaction — profiles, friends system, chat | Web | Major | 2 | sbrugman, mucabrin, arcornil |
 | ORM (Prisma) | Web | Minor | 1 | mucabrin |
+| Support for additional browsers (Firefox, Brave) | Web | Minor | 1 | team |
 | Standard user management & authentication | User Management | Major | 2 | mucabrin, sbrugman |
 | Game statistics & match history | User Management | Minor | 1 | arcornil, mucabrin |
 | Web-based game (Codenames) | Gaming | Major | 2 | arcornil |
 | Multiplayer 3+ players (4-player Codenames) | Gaming | Major | 2 | arcornil |
 | Remote players — real-time play across machines | Gaming | Major | 2 | arcornil |
-| 3D Game WASM-compiled | Gaming | Major | 2 | praucq |
-| **Total** | | | **16** | |
+| Additional Game ( WIP ) | Gaming | Major | (2) | praucq |
+| **Total** | | | **17** (19) | |
 
 ### Module Details
 
@@ -244,6 +245,8 @@ user_achievements  (junction: users ↔ achievements)
 **User interaction (Major, 2pts):** A profile system displays user information and stats. A friends system allows adding users by username, accepting or declining requests, and viewing the full friend list with live presence indicators. Real-time direct messaging runs over a dedicated `/ws/chat` Socket.io namespace with authenticated connections, typing indicators, read receipts, presence, and per-user blocking; messages are persisted in the database and can be started directly from the friend list.
 
 **ORM — Prisma (Minor, 1pt):** All database access goes through Prisma with a schema-first approach. Migrations are versioned and applied automatically on startup via `prisma migrate deploy`.
+
+**Support for additional browsers (Minor, 1pt):** The app is developed and tested primarily on Firefox, Brave, and Chromium. All features — auth, lobby, real-time game, chat, avatar upload, stats/leaderboard — behave identically across the three. See [Browser Compatibility](#browser-compatibility) for details.
 
 **Standard user management (Major, 2pts):** Users register with email and password (bcrypt-hashed), log in to receive a JWT, update their profile information, upload a custom avatar, and see friends' online status in real time. Registration and profile updates are validated on both sides of the wire: the same username, email and password rules run in the browser and again in the service that writes to the database, so the API cannot be bypassed with a direct request. Login and registration are rate limited per IP.
 
@@ -257,6 +260,25 @@ user_achievements  (junction: users ↔ achievements)
 
 ---
 
+## Browser Compatibility
+
+The app is developed against and regularly tested on:
+
+| Browser | Engine | Status |
+|---|---|---|
+| Chromium / Google Chrome | Blink | Fully supported (primary dev target) |
+| Brave | Blink | Fully supported |
+| Firefox | Gecko | Fully supported |
+
+No vendor-prefixed CSS or browser-specific code paths were needed — Tailwind's baseline utility classes and the standard Web APIs used across the app (Fetch, WebSocket, FormData, LocalStorage) are natively supported by all three, so UI/UX is consistent across the board.
+
+### Known limitations
+
+- **Self-signed certificate warning:** since Nginx terminates TLS with a self-signed cert, every browser shows a security interstitial on first visit. The bypass flow differs slightly by browser (Chrome/Brave: "Advanced" → "Proceed to localhost"; Firefox: "Advanced" → "Accept the Risk and Continue"), but only needs to be done once per browser/machine.
+- **Brave Shields:** aggressive Shields settings can interfere with the self-signed cert or block the WebSocket upgrade request on localhost. Lowering Shields for the site (same as with any local HTTPS dev server) resolves it.
+
+---
+
 ## Instructions
 
 ### Prerequisites
@@ -266,7 +288,7 @@ user_achievements  (junction: users ↔ achievements)
 | Docker | 24+ |
 | Docker Compose | v2 (bundled with Docker Desktop) |
 | Git | any recent version |
-| Web browser | Latest stable Google Chrome |
+| Web browser | Latest stable Chrome, Brave, or Firefox |
 
 No other software needs to be installed on the host — Node.js, PostgreSQL, and all dependencies run inside containers.
 
@@ -311,7 +333,7 @@ This builds all five images (nginx, frontend, backend, auth-service, postgresql)
 
 **4. Open the application**
 
-Navigate to [https://localhost](https://localhost) in Google Chrome.
+Navigate to [https://localhost](https://localhost) in Chrome, Brave, or Firefox.
 
 > The application uses a self-signed TLS certificate. Your browser will show a security warning — click "Advanced" → "Proceed to localhost" to continue.
 
