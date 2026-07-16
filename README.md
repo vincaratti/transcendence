@@ -393,6 +393,8 @@ docker compose exec backend npx prisma studio
 - Developed a first-person 3D slasher game prototype as an additional project, designed to reuse the existing backend API and authentication infrastructure
 - Contributed to shared tooling and backend integration patterns used across both applications
 
+**Challenge:** Learning how to use a new editor and a new language of programmation. Learning how to adapt that programmation to the browser and internet restrictions while keeping the errors down.
+
 ---
 
 ## Resources
