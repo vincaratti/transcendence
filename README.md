@@ -232,7 +232,7 @@ user_achievements  (junction: users ↔ achievements)
 | Web-based game (Codenames) | Gaming | Major | 2 | arcornil |
 | Multiplayer 3+ players (4-player Codenames) | Gaming | Major | 2 | arcornil |
 | Remote players — real-time play across machines | Gaming | Major | 2 | arcornil |
-| [BONUS - EXTRA MODULE] 3D Game WASM-compiled | Gaming | Bonus | 2 | praucq |
+| 3D Game WASM-compiled | Gaming | Major | 2 | praucq |
 | **Total** | | | **16** | |
 
 ### Module Details
